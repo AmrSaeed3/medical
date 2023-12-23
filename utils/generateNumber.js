@@ -7,7 +7,6 @@ function generateRandomNumber(digits) {
   const randomNumber = Math.floor(min + Math.random() * (max - min + 1));
 
   // إرجاع الرقم العشوائي
-  console.log(randomNumber);
   return randomNumber;
 }
 module.exports = generateRandomNumber;
