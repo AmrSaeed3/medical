@@ -6,6 +6,7 @@ const {
   validationSchema,
   validationSchema2,
   validationSchema3,
+  validationSchema4,
 } = require("../Middlewires/validationSchema");
 const verifyToken = require("../Middlewires/verify.token");
 
@@ -18,8 +19,6 @@ router
   );
 
 router.route("/verify").post(verifyToken, usersController.verify);
-
-router.route("/anyone").get(usersController.anyone);
 
 router
   .route("/login")
@@ -36,6 +35,8 @@ router
     usersController.handleValidationErrors,
     usersController.login2
   );
+
+router.route("/anyone").get(usersController.anyone);
 
 router.route("/auth/google").get(usersController.authGoogle);
 
@@ -59,7 +60,9 @@ router.get(
 );
 
 // مسار لإعادة تعيين كلمة المرور (نسيان الباسورد)
-router.route("/forgot-password").post(usersController.forgotPassword);
+router
+  .route("/forgot-password")
+  .post(validationSchema4(), usersController.forgotPassword);
 // // مسار لمعالجة إعادة تعيين كلمة المرور بعد الإرسال
 router
   .route("/reset-password")
@@ -74,11 +77,13 @@ router
     usersController.resetPasswordOk
   );
 //
+router
+  .route("/deleteUser")
+  .post(validationSchema4(), usersController.deleteUser);
 
 router.route("/success").get(usersController.success);
 
 router.route("/failure").get(usersController.failure);
-
 
 router.route("/logout").get(usersController.logout);
 
@@ -90,7 +95,6 @@ router.route("/logout2").get(usersController.logout2);
 router.get("/2", (req, res) => {
   res.send("Home Page");
 });
-
 
 // تحقق من ما إذا كان المستخدم قد قام بتسجيل الدخول
 // function isAuthenticated(req, res, next) {

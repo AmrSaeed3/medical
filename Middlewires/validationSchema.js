@@ -18,6 +18,7 @@ const validationSchema = () => {
       .withMessage("password at least is 4 digits"),
   ];
 };
+
 const validationSchema2 = () => {
   return [
     body("email")
@@ -42,8 +43,18 @@ const validationSchema3 = () => {
   ];
 };
 
+const validationSchema4 = () => {
+  return [
+    body("email")
+      .notEmpty()
+      .withMessage("email is required")
+      .isEmail()
+      .withMessage("email is not avalid"),
+  ];
+};
 module.exports = {
   validationSchema,
   validationSchema2,
   validationSchema3,
+  validationSchema4,
 };
