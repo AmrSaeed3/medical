@@ -1,0 +1,4 @@
+node_modules/
+useless/
+app.js
+app2.js
