@@ -62,7 +62,11 @@ router.get(
 // مسار لإعادة تعيين كلمة المرور (نسيان الباسورد)
 router
   .route("/forgot-password")
-  .post(validationSchema4(), usersController.forgotPassword);
+  .post(
+    validationSchema4(),
+    usersController.handleValidationErrors,
+    usersController.forgotPassword
+  );
 // // مسار لمعالجة إعادة تعيين كلمة المرور بعد الإرسال
 router
   .route("/reset-password")
@@ -79,7 +83,11 @@ router
 //
 router
   .route("/deleteUser")
-  .post(validationSchema4(), usersController.deleteUser);
+  .post(
+    validationSchema4(),
+    usersController.handleValidationErrors,
+    usersController.deleteUser
+  );
 
 router.route("/success").get(usersController.success);
 
