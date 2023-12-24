@@ -95,7 +95,7 @@ router.route("/failure").get(usersController.failure);
 
 router.route("/logout").get(usersController.logout);
 
-router.route("/").get(usersController.homePage);
+router.route("/3").get(usersController.homePage);
 
 router.route("/logout2").get(usersController.logout2);
 
@@ -103,7 +103,10 @@ router.route("/logout2").get(usersController.logout2);
 router.get("/2", (req, res) => {
   res.send("Home Page");
 });
-
+//
+router.get('/home', usersController.homePage);
+router.get('/privacy-policy', usersController.privacyPolicy);
+router.get('/terms-of-service', usersController.termsOfService);
 // تحقق من ما إذا كان المستخدم قد قام بتسجيل الدخول
 // function isAuthenticated(req, res, next) {
 //   if (req.isAuthenticated()) {

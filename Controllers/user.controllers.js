@@ -8,6 +8,9 @@ const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const mac = require("../Middlewires/mac");
 const emailVerfy = require("../Middlewires/sendEmail");
+const path = require('path');
+// استخدام مسار كامل لمجلد views خارج الملف الرئيسي
+const viewsPath = path.join("E:\\programs\\NodeJs\\medical");
 // const uuid = require('uuid');
 //
 
@@ -333,9 +336,24 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
   );
   return next(error)
 });
+//
+const homePage2 = (req, res) => {
+  res.sendFile(path.join(viewsPath, 'view', 'Home Page.html'));
+}
+
+const privacyPolicy = (req, res) => {
+  res.sendFile(path.join(viewsPath, 'view', 'Privacy Policy.html'));
+}
+
+const termsOfService= (req, res) => {
+  res.sendFile(path.join(viewsPath, 'view', 'Terms of Service.html'));
+}
 module.exports = {
   //getAllUsers,
   // authGoogleCallback,
+  homePage2,
+  privacyPolicy,
+  termsOfService,
   deleteUser,
   verify,
   anyone,
