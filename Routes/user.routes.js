@@ -45,7 +45,6 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/failure" }),
   (req, res) => {
-    res.cookie("userId", req.user._id.toString(), { maxAge: 3600000 }); //كوكيز صالحه لمده ساعه واحده
     res.redirect("/success");
   }
 );
