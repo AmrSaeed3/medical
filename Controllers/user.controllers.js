@@ -8,15 +8,12 @@ const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const mac = require("../Middlewires/mac");
 const emailVerfy = require("../Middlewires/sendEmail");
-const path = require('path');
+const path = require("path");
+const moment = require("moment");
 // استخدام مسار كامل لمجلد views خارج الملف الرئيسي
 const viewsPath = path.join("E:\\programs\\NodeJs\\medical");
-// const uuid = require('uuid');
-//
 
-//getAllUsers
 //register
-
 const register = asyncWrapper(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -50,6 +47,8 @@ const register = asyncWrapper(async (req, res, next) => {
 });
 
 const verify = asyncWrapper(async (req, res, next) => {
+  // الحصول على التاريخ والوقت الحالي
+  const currentDate = moment();
   const { email, verifyCode, password, userName, role } = req.currentUser;
   const currentCode = verifyCode;
   const code = req.body.code;
@@ -76,6 +75,7 @@ const verify = asyncWrapper(async (req, res, next) => {
     email,
     password,
     role,
+    date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newUser.save();
   res.json({ status: httpStatus.SUCCESS, data: { User: newUser } });
@@ -304,14 +304,12 @@ const anyone = asyncWrapper(async (req, res, next) => {
     mac: mac,
   });
   await newUser.save();
-  res
-    .status(200)
-    .json({
-      status: httpStatus.SUCCESS,
-      data: newUser,
-      token: token.token,
-      expireData: token.expireIn,
-    });
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: newUser,
+    token: token.token,
+    expireData: token.expireIn,
+  });
   // setTimeout(() => {
   //   res.redirect('/success')
   // }, token.expireData);
@@ -334,20 +332,20 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
     200,
     httpStatus.SUCCESS
   );
-  return next(error)
+  return next(error);
 });
 //
 const homePage2 = (req, res) => {
-  res.sendFile(path.join(viewsPath, 'view', 'Home Page.html'));
-}
+  res.sendFile(path.join(viewsPath, "view", "Home Page.html"));
+};
 
 const privacyPolicy = (req, res) => {
-  res.sendFile(path.join(viewsPath, 'view', 'Privacy Policy.html'));
-}
+  res.sendFile(path.join(viewsPath, "view", "Privacy Policy.html"));
+};
 
-const termsOfService= (req, res) => {
-  res.sendFile(path.join(viewsPath, 'view', 'Terms of Service.html'));
-}
+const termsOfService = (req, res) => {
+  res.sendFile(path.join(viewsPath, "view", "Terms of Service.html"));
+};
 module.exports = {
   //getAllUsers,
   // authGoogleCallback,

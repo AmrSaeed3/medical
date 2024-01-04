@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     enum: [userRole.USER, userRole.ADMIN, userRole.MANGER],
     default: userRole.USER,
   },
+  date:{
+    type: String,
+    require: [true, "date are required"],
+  },
+  
 });
 const userSchema2 = new mongoose.Schema({
   googleId: String,
