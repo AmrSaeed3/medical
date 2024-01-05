@@ -423,7 +423,7 @@ const getOneData = asyncWrapper(async (req, res, next) => {
   }
   const currentUrl = `${req.protocol}://${req.get('host')}`;
   
-  return res.json({ status: httpStatus.SUCCESS, data: data ,CurrentURL: `${currentUrl}/uploads/${data.avatar}` });
+  return res.json({ status: httpStatus.SUCCESS, data: data ,CurrentURLPhoto: `${currentUrl}/uploads/${data.avatar}` });
 });
 
 // لسه في تعديلات على avatar
