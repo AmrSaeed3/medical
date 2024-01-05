@@ -392,14 +392,14 @@ const addphoto = asyncWrapper(async (req, res, next) => {
     const error = appError.create("data already saved", 400, httpStatus.FAIL);
     return next(error);
   }
-  const newUser = new User.user8({
+  const newData = new User.user8({
     title: title,
     avatar: req.file.filename,
     explain: explain,
     // date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
-  await newUser.save();
-  res.json({ status: httpStatus.SUCCESS, data: { User: newUser } });
+  await newData.save();
+  res.json({ status: httpStatus.SUCCESS, data:  newData });
 });
 
 const getAllData = asyncWrapper(async (req, res, next) => {
