@@ -1,7 +1,7 @@
 const multer = require("multer");
 const diskStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log("file", file);
+    // console.log("file", file);
     cb(null, "uploads");
   },
   filename(req, file, cb) {
