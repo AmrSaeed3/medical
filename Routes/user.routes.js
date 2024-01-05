@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const usersController = require("../Controllers/user.controllers");
+const { upload } = require("../Middlewires/multer");
 const {
   validationSchema,
   validationSchema2,
@@ -10,31 +11,13 @@ const {
 } = require("../Middlewires/validationSchema");
 const verifyToken = require("../Middlewires/verify.token");
 
-router
-  .route("/register")
-  .post(
-    validationSchema(),
-    usersController.handleValidationErrors,
-    usersController.register
-  );
+router.route("/register").post(validationSchema(), usersController.register);
 
 router.route("/verify").post(verifyToken, usersController.verify);
 
-router
-  .route("/login")
-  .post(
-    validationSchema2(),
-    usersController.handleValidationErrors,
-    usersController.login
-  );
+router.route("/login").post(validationSchema2(), usersController.login);
 
-router
-  .route("/login2")
-  .post(
-    validationSchema2(),
-    usersController.handleValidationErrors,
-    usersController.login2
-  );
+router.route("/login2").post(validationSchema2(), usersController.login2);
 
 router.route("/anyone").get(usersController.anyone);
 
@@ -61,11 +44,7 @@ router.get(
 // مسار لإعادة تعيين كلمة المرور (نسيان الباسورد)
 router
   .route("/forgot-password")
-  .post(
-    validationSchema4(),
-    usersController.handleValidationErrors,
-    usersController.forgotPassword
-  );
+  .post(validationSchema4(), usersController.forgotPassword);
 // // مسار لمعالجة إعادة تعيين كلمة المرور بعد الإرسال
 router
   .route("/reset-password")
@@ -73,20 +52,11 @@ router
 // مسار لإعادة تعيين كلمة المرور
 router
   .route("/reset-password-ok")
-  .post(
-    verifyToken,
-    validationSchema3(),
-    usersController.handleValidationErrors,
-    usersController.resetPasswordOk
-  );
+  .post(verifyToken, validationSchema3(), usersController.resetPasswordOk);
 //
 router
   .route("/deleteUser")
-  .post(
-    validationSchema4(),
-    usersController.handleValidationErrors,
-    usersController.deleteUser
-  );
+  .post(validationSchema4(), usersController.deleteUser);
 
 router.route("/success").get(usersController.success);
 
@@ -103,9 +73,9 @@ router.get("/2", (req, res) => {
   res.send("Home Page");
 });
 //
-router.get('/home', usersController.homePage);
-router.get('/privacy-policy', usersController.privacyPolicy);
-router.get('/terms-of-service', usersController.termsOfService);
+router.get("/home", usersController.homePage);
+router.get("/privacy-policy", usersController.privacyPolicy);
+router.get("/terms-of-service", usersController.termsOfService);
 // تحقق من ما إذا كان المستخدم قد قام بتسجيل الدخول
 // function isAuthenticated(req, res, next) {
 //   if (req.isAuthenticated()) {
@@ -113,4 +83,13 @@ router.get('/terms-of-service', usersController.termsOfService);
 //   }
 //   res.redirect("/");
 // }
+router
+  .route("/addphoto")
+  .post(upload.single("avatar"), usersController.addphoto);
+router.route("/getAllData").get(usersController.getAllData);
+router
+  .route("/allData/:title")
+  .get(usersController.getOneData)
+  .patch(usersController.updateData)
+  .delete(usersController.deleteData);
 module.exports = router;

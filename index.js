@@ -7,6 +7,7 @@ const passportConfig = require("./Middlewires/passport");
 const usersRouter = require("./Routes/user.routes");
 const httpStatusTex = require("./utils/httpStatus");
 const app = express();
+const path = require("path")
 const mongoose = require("mongoose");
 require("dotenv").config();
 const utl = process.env.MONGO_URL;
@@ -48,7 +49,7 @@ app.use(bodyParser.json());
 passportConfig();
 
 app.use("/", usersRouter);
-
+app.use('/uploads',express.static(path.join(__dirname ,'uploads')))
 app.all("*", (req, res, next) => {
   return res.status(404).json({
     status: httpStatusTex.ERROR,
@@ -61,7 +62,7 @@ app.use((error, req, res, next) => {
     status: error.statusText || httpStatusTex.ERROR,
     message: error.message,
     code: error.statusCode || 500,
-    data: null,
+    // data: null,
   });
 });
 const port = 3000;
