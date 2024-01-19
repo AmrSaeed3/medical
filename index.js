@@ -4,7 +4,6 @@ const expressSession = require("express-session");
 const bodyParser = require("body-parser");
 const connectFlash = require("connect-flash");
 const passportConfig = require("./Middlewires/passport");
-const usersRouter = require("./Routes/user.routes");
 const httpStatusTex = require("./utils/httpStatus");
 const app = express();
 const path = require("path")
@@ -48,7 +47,11 @@ app.use(bodyParser.json());
 
 passportConfig();
 
-app.use("/", usersRouter);
+const usersRouter = require("./Routes/user.routes");
+app.use("/", usersRouter); //api/users
+
+const firstAidRouter = require("./Routes/first aid.routes");
+app.use("/api/firstAid", firstAidRouter); //api/firstAid
 app.use('/uploads',express.static(path.join(__dirname ,'uploads')))
 app.all("*", (req, res, next) => {
   return res.status(404).json({

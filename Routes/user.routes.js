@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const usersController = require("../Controllers/user.controllers");
-const { upload } = require("../Middlewires/multer");
+const { uploadImage } = require("../Middlewires/multer");
 const {
   validationSchema,
   validationSchema2,
@@ -85,7 +85,7 @@ router.get("/terms-of-service", usersController.termsOfService);
 // }
 router
   .route("/addphoto")
-  .post(upload.single("avatar"), usersController.addphoto);
+  .post(uploadImage.single("avatar"), usersController.addphoto);
 router.route("/getAllData").get(usersController.getAllData);
 router
   .route("/allData/:title")
