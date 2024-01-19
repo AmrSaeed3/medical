@@ -140,7 +140,7 @@ const allShapter1 = async (req, res, next) => {
 };
 const shapter1 = async (req, res, next) => {
   const numbers = req.params.num;
-  const shapter = await User.user1.findOne({ name: "Shapter 1" });
+  const shapter = await User.user1.findOne({ name: "shapter 1" });
   if (!shapter) {
     const error = appError.create(
       "this shapter not found try again !",
