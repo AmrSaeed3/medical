@@ -165,8 +165,10 @@ const shapter1 = async (req, res, next) => {
     );
     return next(error);
   }
+  const currentUrl = `${req.protocol}://${req.get("host")}`;
   res.json({
     data: shapter.paragraphs[numbers - 1],
+    CurrentURLPhoto: `${currentUrl}/uploads/shapter 1/put in name photo.jpg`,
     totalParagraphs: shapter.totalParagraphs,
   });
 };
