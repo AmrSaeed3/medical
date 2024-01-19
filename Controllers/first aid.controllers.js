@@ -51,6 +51,18 @@ const addShapter = async (req, res, next) => {
         const name = uploadedFile.fieldname;
         const shapter = await User.user1.findOne({ name: name });
         if (shapter) {
+          const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
+          const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
+          fs.unlink(filePathToDelete, (err) => {
+            if (err) {
+              const error = appError.create(
+                "wrong in the delete data",
+                400,
+                httpStatus.FAIL
+              );
+              return next(error);
+            }
+          });
           const error = appError.create(
             "this shapter is already exist",
             400,
@@ -127,7 +139,10 @@ const addShapter = async (req, res, next) => {
 // };
 
 const allShapter1 = async (req, res, next) => {
-  const shapter = await User.user1.findOne({ name: "shapter 1" },{ __v: false, _id: false });
+  const shapter = await User.user1.findOne(
+    { name: "shapter 1" },
+    { __v: false, _id: false }
+  );
   if (!shapter) {
     const error = appError.create(
       "this shapter not found try again !",
