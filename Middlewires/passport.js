@@ -1,15 +1,15 @@
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcryptjs");
-const User = require("../Models/user.models");
-const LocalUser = User.user1;
+const {user1,user2,user6} = require("../Models/user.models");
+const LocalUser = user1;
 const appError = require("../utils/appError");
 const httpStatus = require("../utils/httpStatus");
 const passport = require("passport");
 //
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const GoogleUser = User.user2;
+const GoogleUser = user2;
 const FacebookStrategy = require("passport-facebook").Strategy;
-const FaceBookUser = User.user6;
+const FaceBookUser = user6;
 const config = require("../config/config");
 
 module.exports = () => {

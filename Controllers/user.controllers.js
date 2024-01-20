@@ -1,4 +1,4 @@
-const User = require("../Models/user.models");
+const {user1 ,user2 , user4 , user8} = require("../Models/user.models");
 const fs = require("fs");
 const appError = require("../utils/appError");
 const httpStatus = require("../utils/httpStatus");
@@ -11,6 +11,11 @@ const mac = require("../Middlewires/mac");
 const emailVerfy = require("../Middlewires/sendEmail");
 const path = require("path");
 const moment = require("moment");
+const UserAll = user1;
+const UserGoogle = user2;
+const UserAnyone = user4;
+const illnesses = user8;
+// const
 // استخدام مسار كامل لمجلد views خارج الملف الرئيسي
 const viewsPath = path.join("E:\\programs\\NodeJs\\medical");
 
@@ -22,7 +27,7 @@ const register = asyncWrapper(async (req, res, next) => {
     return next(error);
   }
   const { userName, email, password, role } = req.body;
-  const olduser = await User.user1.findOne({ email: email });
+  const olduser = await UserAll.findOne({ email: email });
   if (olduser) {
     const error = appError.create("user already exists", 400, httpStatus.FAIL);
     return next(error);
@@ -63,7 +68,7 @@ const verify = asyncWrapper(async (req, res, next) => {
     );
     return next(error);
   }
-  const oldEmail = await User.user1.findOne({ email: email });
+  const oldEmail = await UserAll.findOne({ email: email });
   if (oldEmail) {
     const error = appError.create(
       "the email has been already registrated",
@@ -72,7 +77,7 @@ const verify = asyncWrapper(async (req, res, next) => {
     );
     return next(error);
   }
-  const newUser = new User.user1({
+  const newUser = new UserAll({
     userName,
     email,
     password,
@@ -103,7 +108,7 @@ const login2 = asyncWrapper(async (req, res, next) => {
     return next(error);
   }
 
-  const user = await User.user1.findOne({ email: email });
+  const user = await UserAll.findOne({ email: email });
   if (!user) {
     const error = appError.create("user not found", 400, httpStatus.FAIL);
     return next(error);
@@ -142,7 +147,7 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
     return next(error);
   }
   const email = req.body.email;
-  const user = await User.user1.findOne({ email: email });
+  const user = await UserAll.findOne({ email: email });
   if (!user) {
     const error = appError.create(
       "not found this email !",
@@ -213,7 +218,7 @@ const resetPasswordOk = asyncWrapper(async (req, res, next) => {
     return next(error);
   }
   const hashPassword = await bcrypt.hash(newPassword, 10);
-  const newUser = await User.user1.findOne({ email: email });
+  const newUser = await UserAll.findOne({ email: email });
   newUser.password = hashPassword;
   await newUser.save();
   const error = appError.create(
@@ -273,7 +278,7 @@ const logout = async (req, res) => {
     // توفير وظيفة callback
     req.logout(() => {
       // حذف البريد الإلكتروني من قاعدة البيانات
-      User.user2
+      UserGoogle
         .findOneAndDelete({ email })
         .then(() => {
           // حذف الكوكيز معرف المستخدم
@@ -307,7 +312,7 @@ const authGoogle = (req, res) => {
 };
 
 const anyone = asyncWrapper(async (req, res, next) => {
-  const user = await User.user4.findOne({ mac: mac });
+  const user = await UserAnyone.findOne({ mac: mac });
   if (user) {
     const error = appError.create(
       "Oops , you can use SKIP FOR NOW just only once",
@@ -319,7 +324,7 @@ const anyone = asyncWrapper(async (req, res, next) => {
   const token = await generateJwt.generatequicly({
     mac: mac,
   });
-  const newUser = new User.user4({
+  const newUser = new UserAnyone({
     mac: mac,
   });
   await newUser.save();
@@ -341,7 +346,7 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
     return next(error);
   }
   const email = req.body.email;
-  const user = await User.user1.findOne({ email: email });
+  const user = await UserAll.findOne({ email: email });
   if (!user) {
     const error = appError.create(
       "not found this email !",
@@ -350,7 +355,7 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
     );
     return next(error);
   }
-  await User.user1.deleteOne({ email: email });
+  await UserAll.deleteOne({ email: email });
   const error = appError.create(
     "this email has been deleted",
     200,
@@ -370,12 +375,12 @@ const privacyPolicy = (req, res) => {
 const termsOfService = (req, res) => {
   res.sendFile(path.join(viewsPath, "view", "Terms of Service.html"));
 };
-
+//
 const addphoto = asyncWrapper(async (req, res, next) => {
   // الحصول على التاريخ والوقت الحالي
   // const currentDate = moment();
   const { explain, title } = req.body;
-  const oldData = await User.user8.findOne({ title: title });
+  const oldData = await illnesses.findOne({ title: title });
   if (oldData) {
     const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
     const filePathToDelete = path.join(__dirname, "..", "uploads", fileName); // تحديد الملف بناءً على المجلد الجذر
@@ -392,18 +397,18 @@ const addphoto = asyncWrapper(async (req, res, next) => {
     const error = appError.create("data already saved", 400, httpStatus.FAIL);
     return next(error);
   }
-  const newData = new User.user8({
+  const newData = new illnesses({
     title: title,
     avatar: req.file.filename,
     explain: explain,
     // date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newData.save();
-  res.json({ status: httpStatus.SUCCESS, data:  newData });
+  res.json({ status: httpStatus.SUCCESS, data: newData });
 });
 
 const getAllData = asyncWrapper(async (req, res, next) => {
-  const all = await User.user8.find({}, { __v: false, _id: false });
+  const all = await illnesses.find({}, { __v: false, _id: false });
   if (all.length === 0) {
     const error = appError.create("data is Empty!", 200, httpStatus.SUCCESS);
     return next(error);
@@ -412,8 +417,8 @@ const getAllData = asyncWrapper(async (req, res, next) => {
 });
 
 const getOneData = asyncWrapper(async (req, res, next) => {
-  const title = req.params.title
-  const data = await User.user8.findOne(
+  const title = req.params.title;
+  const data = await illnesses.findOne(
     { title: title },
     { __v: false, _id: false }
   );
@@ -421,14 +426,18 @@ const getOneData = asyncWrapper(async (req, res, next) => {
     const error = appError.create("data not found!", 404, httpStatus.FAIL);
     return next(error);
   }
-  const currentUrl = `${req.protocol}://${req.get('host')}`;
-  
-  return res.json({ status: httpStatus.SUCCESS, data: data ,CurrentURLPhoto: `${currentUrl}/uploads/${data.avatar}` });
+  const currentUrl = `${req.protocol}://${req.get("host")}`;
+
+  return res.json({
+    status: httpStatus.SUCCESS,
+    data: data,
+    CurrentURLPhoto: `${currentUrl}/uploads/${data.avatar}`,
+  });
 });
 
 // لسه في تعديلات على avatar
 const updateData = asyncWrapper(async (req, res) => {
-  const updatedData = await User.user8.updateOne(
+  const updatedData = await illnesses.updateOne(
     { title: req.params.title },
     {
       $set: { ...req.body },
@@ -438,7 +447,7 @@ const updateData = asyncWrapper(async (req, res) => {
 });
 
 const deleteData = asyncWrapper(async (req, res, next) => {
-  const data = await User.user8.findOne({ title: req.params.title });
+  const data = await illnesses.findOne({ title: req.params.title });
   if (!data) {
     const error = appError.create(
       "this data not found !",
@@ -447,7 +456,7 @@ const deleteData = asyncWrapper(async (req, res, next) => {
     );
     return next(error);
   }
-  await User.user8.deleteOne({ title: req.params.title });
+  await illnesses.deleteOne({ title: req.params.title });
   const fileName = data.avatar; // اسم الملف الذي تريد حذفه
   const filePathToDelete = path.join(__dirname, "..", "uploads", fileName); // تحديد الملف بناءً على المجلد الجذر
   fs.unlink(filePathToDelete, (err) => {

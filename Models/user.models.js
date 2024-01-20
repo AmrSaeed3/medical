@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const userRole = require("../utils/userRoles");
 
-const userSchema = new mongoose.Schema({
+const User = new mongoose.Schema({
   userName: {
     type: String,
     require: [true, "user name are required"],
@@ -31,38 +31,38 @@ const userSchema = new mongoose.Schema({
     default: "uploads/profile.png",
   },
 });
-const userSchema2 = new mongoose.Schema({
+const UserGoogle = new mongoose.Schema({
   googleId: String,
   displayName: String,
   email: String,
 });
-const userSchema3 = new mongoose.Schema({
+const UserToken = new mongoose.Schema({
   token: String,
 });
-const userSchema4 = new mongoose.Schema({
+const UserAnyone = new mongoose.Schema({
   mac: String,
 });
-const userSchema6 = new mongoose.Schema({
+const UserFaceBook = new mongoose.Schema({
   facebookId: String,
   displayName: String,
   // email: String,
   // token:String,
 });
-const userSchema7 = new mongoose.Schema({
+const UserJWT = new mongoose.Schema({
   macAddress: { type: String, required: true, unique: true },
 });
-const userSchema8 = new mongoose.Schema({
+const illnesses = new mongoose.Schema({
   title:String,
   avatar: String,
   explain: String,
 });
-const user1 = mongoose.model("User", userSchema);
-const user2 = mongoose.model("UserGoogle", userSchema2);
-const user3 = mongoose.model("UserToken", userSchema3);
-const user4 = mongoose.model("UserAnyone", userSchema4);
-const user6 = mongoose.model("UserFaceBook", userSchema6);
-const user7 = mongoose.model("UserJWT", userSchema7);
-const user8 = mongoose.model("illnesses" , userSchema8)
+const user1 = mongoose.model("User", User);
+const user2 = mongoose.model("UserGoogle", UserGoogle);
+const user3 = mongoose.model("UserToken", UserToken);
+const user4 = mongoose.model("UserAnyone", UserAnyone);
+const user6 = mongoose.model("UserFaceBook", UserFaceBook);
+const user7 = mongoose.model("UserJWT", UserJWT);
+const user8 = mongoose.model("illnesses" , illnesses)
 module.exports = {
   user1,
   user2,

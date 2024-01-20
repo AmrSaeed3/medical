@@ -1,9 +1,11 @@
-const User = require("../Models/firs aid.models");
+const {user1} = require("../Models/firs aid.models");
 const mammoth = require("mammoth");
 const fs = require("fs");
 const path = require("path");
 const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
+const chapterModel = user1;
+
 
 const addChapter = async (req, res, next) => {
   if (!req.file) {
@@ -14,7 +16,6 @@ const addChapter = async (req, res, next) => {
     );
     return next(error);
   }
-  const uploadedFile = req.file;
   const paragraphMarker = "@"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
   const filePath = req.file.filename;
 
@@ -50,7 +51,7 @@ const addChapter = async (req, res, next) => {
         });
         const name = filePath.split(".")[0];
         extension = filePath.split(".")[1];
-        const chapter = await User.user1.findOne({ name: name });
+        const chapter = await chapterModel.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
           const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
@@ -71,7 +72,7 @@ const addChapter = async (req, res, next) => {
           );
           return next(error);
         }
-        const newaway = new User.user1({
+        const newaway = new chapterModel({
           name: name,
           extension : extension,
           paragraphs: numberedParagraphs,
@@ -142,7 +143,7 @@ const addChapter = async (req, res, next) => {
 
 const allChapter = async (req, res, next) => {
   const name = req.params.name;
-  const chapter = await User.user1.findOne(
+  const chapter = await chapterModel.findOne(
     { name: name },
     { __v: false, _id: false , extension:false }
   );
@@ -160,7 +161,7 @@ const allChapter = async (req, res, next) => {
 const chapter = async (req, res, next) => {
   const numbers = req.params.num;
   const name = req.params.name
-  const chapter = await User.user1.findOne({ name: name });
+  const chapter = await chapterModel.findOne({ name: name });
   if (!chapter) {
     const error = appError.create(
       "this chapter not found try again !",
