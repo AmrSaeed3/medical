@@ -5,7 +5,7 @@ const path = require("path");
 const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
 
-const addShapter = async (req, res, next) => {
+const addChapter = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
       "The file was not uploaded",
@@ -49,8 +49,8 @@ const addShapter = async (req, res, next) => {
           return { pageNumber: paragraphNumber, text: paragraph };
         });
         const name = uploadedFile.fieldname;
-        const shapter = await User.user1.findOne({ name: name });
-        if (shapter) {
+        const chapter = await User.user1.findOne({ name: name });
+        if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
           const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
           fs.unlink(filePathToDelete, (err) => {
@@ -64,7 +64,7 @@ const addShapter = async (req, res, next) => {
             }
           });
           const error = appError.create(
-            "this shapter is already exist",
+            "this chapter is already exist",
             400,
             statusText.FAIL
           );
@@ -95,7 +95,7 @@ const addShapter = async (req, res, next) => {
   });
 };
 //modify size page
-// const shapter1 = (req, res) => {
+// const chapter1 = (req, res) => {
 //   // const pageSize = 200; // حجم الصفحة
 //   const paragraphMarker = "@"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
 
@@ -138,28 +138,28 @@ const addShapter = async (req, res, next) => {
 //   });
 // };
 
-const allShapter1 = async (req, res, next) => {
-  const shapter = await User.user1.findOne(
-    { name: "shapter 1" },
+const allChapter1 = async (req, res, next) => {
+  const chapter = await User.user1.findOne(
+    { name: "chapter 1" },
     { __v: false, _id: false }
   );
-  if (!shapter) {
+  if (!chapter) {
     const error = appError.create(
-      "this shapter not found try again !",
+      "this chapter not found try again !",
       401,
       statusText.FAIL
     );
     return next(error);
   }
-  res.json(shapter);
+  res.json(chapter);
 };
 
-const shapter1 = async (req, res, next) => {
+const chapter1 = async (req, res, next) => {
   const numbers = req.params.num;
-  const shapter = await User.user1.findOne({ name: "shapter 1" });
-  if (!shapter) {
+  const chapter = await User.user1.findOne({ name: "chapter 1" });
+  if (!chapter) {
     const error = appError.create(
-      "this shapter not found try again !",
+      "this chapter not found try again !",
       401,
       statusText.FAIL
     );
@@ -167,14 +167,14 @@ const shapter1 = async (req, res, next) => {
   }
   const currentUrl = `${req.protocol}://${req.get("host")}`;
   res.json({
-    data: shapter.paragraphs[numbers - 1],
-    CurrentURLPhoto: `${currentUrl}/uploads/shapter 1/put in name photo.jpg`,
-    totalParagraphs: shapter.totalParagraphs,
+    data: chapter.paragraphs[numbers - 1],
+    CurrentURLPhoto: `${currentUrl}/uploads/chapter 1/put in name photo.jpg`,
+    totalParagraphs: chapter.totalParagraphs,
   });
 };
 module.exports = {
-  addShapter,
-  allShapter1,
-  //   shapter1,
-  shapter1,
+  addChapter,
+  allChapter1,
+  //   chapter1,
+  chapter1,
 };

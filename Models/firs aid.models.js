@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   paragraphs: Array,
   totalParagraphs: String,
 });
-const user1 = mongoose.model("Shapters", userSchema);
+const user1 = mongoose.model("Chapters", userSchema);
 
 module.exports = {
   user1,
