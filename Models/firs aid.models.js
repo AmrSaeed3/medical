@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   extension:String,
   paragraphs: Array,
-  totalParagraphs: String,
+  totalParagraphs: Number,
 });
 const user1 = mongoose.model("Chapters", userSchema);
 
