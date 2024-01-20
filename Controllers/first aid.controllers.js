@@ -48,7 +48,8 @@ const addChapter = async (req, res, next) => {
           const paragraphNumber = index + 1;
           return { pageNumber: paragraphNumber, text: paragraph };
         });
-        const name = uploadedFile.fieldname;
+        const name = filePath.split(".")[0];
+        extension = filePath.split(".")[1];
         const chapter = await User.user1.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
@@ -72,6 +73,7 @@ const addChapter = async (req, res, next) => {
         }
         const newaway = new User.user1({
           name: name,
+          extension : extension,
           paragraphs: numberedParagraphs,
           totalParagraphs: paragraphs.length,
         });
@@ -138,10 +140,11 @@ const addChapter = async (req, res, next) => {
 //   });
 // };
 
-const allChapter1 = async (req, res, next) => {
+const allChapter = async (req, res, next) => {
+  const name = req.params.name;
   const chapter = await User.user1.findOne(
-    { name: "chapter 1" },
-    { __v: false, _id: false }
+    { name: name },
+    { __v: false, _id: false , extension:false }
   );
   if (!chapter) {
     const error = appError.create(
@@ -154,9 +157,10 @@ const allChapter1 = async (req, res, next) => {
   res.json(chapter);
 };
 
-const chapter1 = async (req, res, next) => {
+const chapter = async (req, res, next) => {
   const numbers = req.params.num;
-  const chapter = await User.user1.findOne({ name: "chapter 1" });
+  const name = req.params.name
+  const chapter = await User.user1.findOne({ name: name });
   if (!chapter) {
     const error = appError.create(
       "this chapter not found try again !",
@@ -174,7 +178,7 @@ const chapter1 = async (req, res, next) => {
 };
 module.exports = {
   addChapter,
-  allChapter1,
+  allChapter,
   //   chapter1,
-  chapter1,
+  chapter,
 };

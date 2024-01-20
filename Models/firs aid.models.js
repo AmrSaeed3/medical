@@ -3,6 +3,7 @@ const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
   name: String,
+  extension:String,
   paragraphs: Array,
   totalParagraphs: String,
 });
