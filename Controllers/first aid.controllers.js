@@ -54,7 +54,7 @@ const addChapter = async (req, res, next) => {
             // استخراج الحروف فقط
             const lettersOnly = sentence.replace(/[^a-zA-Z\s]/g, "");
             //إزالة المسافة في بداية الجملة
-            const cleanedSentence = lettersOnly.replace(/^\s+/, "");
+            const cleanedSentence = lettersOnly.replace(/^\s+/, "").replace(/\s+$/, '');
             return cleanedSentence;
           }
 
@@ -96,7 +96,7 @@ const addChapter = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        await newaway.save();
+        // await newaway.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
