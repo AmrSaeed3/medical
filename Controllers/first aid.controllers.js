@@ -102,8 +102,8 @@ const addChapter = async (req, res, next) => {
         res.json({
           message: "The file has been uploaded successfully.",
           name: name,
-          paragraphs: numberedParagraphs,
           totalParagraphs: paragraphs.length,
+          paragraphs: numberedParagraphs,
         });
       })
       .catch((err) => {
