@@ -93,8 +93,8 @@ const addChapter = async (req, res, next) => {
         const newaway = new chapterModel({
           name: name,
           extension: extension,
-          paragraphs: numberedParagraphs,
           totalParagraphs: paragraphs.length,
+          paragraphs: numberedParagraphs,
         });
         await newaway.save();
 
