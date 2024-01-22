@@ -96,11 +96,12 @@ const addChapter = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        // await newaway.save();
+        await newaway.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
           message: "The file has been uploaded successfully.",
+          name: name,
           paragraphs: numberedParagraphs,
           totalParagraphs: paragraphs.length,
         });
