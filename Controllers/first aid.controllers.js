@@ -1,11 +1,10 @@
-const {user1} = require("../Models/firs aid.models");
+const { user1 } = require("../Models/firs aid.models");
 const mammoth = require("mammoth");
 const fs = require("fs");
 const path = require("path");
 const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
 const chapterModel = user1;
-
 
 const addChapter = async (req, res, next) => {
   if (!req.file) {
@@ -47,7 +46,27 @@ const addChapter = async (req, res, next) => {
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
-          return { pageNumber: paragraphNumber, text: paragraph };
+          const lines = paragraph.split("\n");
+          const firstLine = lines.length > 0 ? lines[0].trim() : "";
+
+          function extractLetters(sentence) {
+            // استخراج الحروف فقط
+            const lettersOnly = sentence.replace(/[^a-zA-Z\s]/g, "");
+            //إزالة المسافة في بداية الجملة
+            const cleanedSentence = lettersOnly.replace(/^\s+/, "");
+            return cleanedSentence;
+          }
+
+          const result = extractLetters(firstLine);
+          const currentPhoto = `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/chapter 1/${result}.jpg`;
+          return {
+            pageNumber: paragraphNumber,
+            title: firstLine,
+            text: paragraph.replace(firstLine, "").trim(),
+            currentPhoto: currentPhoto,
+          };
         });
         const name = filePath.split(".")[0];
         extension = filePath.split(".")[1];
@@ -74,7 +93,7 @@ const addChapter = async (req, res, next) => {
         }
         const newaway = new chapterModel({
           name: name,
-          extension : extension,
+          extension: extension,
           paragraphs: numberedParagraphs,
           totalParagraphs: paragraphs.length,
         });
@@ -145,7 +164,7 @@ const allChapter = async (req, res, next) => {
   const name = req.params.name;
   const chapter = await chapterModel.findOne(
     { name: name },
-    { __v: false, _id: false , extension:false }
+    { __v: false, _id: false, extension: false }
   );
   if (!chapter) {
     const error = appError.create(
@@ -160,7 +179,7 @@ const allChapter = async (req, res, next) => {
 
 const chapter = async (req, res, next) => {
   const numbers = req.params.num;
-  const name = req.params.name
+  const name = req.params.name;
   const chapter = await chapterModel.findOne({ name: name });
   if (!chapter) {
     const error = appError.create(
@@ -170,10 +189,8 @@ const chapter = async (req, res, next) => {
     );
     return next(error);
   }
-  const currentUrl = `${req.protocol}://${req.get("host")}`;
   res.json({
     data: chapter.paragraphs[numbers - 1],
-    CurrentURLPhoto: `${currentUrl}/uploads/chapter 1/put in name photo.jpg`,
     totalParagraphs: chapter.totalParagraphs,
   });
 };
