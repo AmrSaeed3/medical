@@ -189,8 +189,8 @@ const chapter = async (req, res, next) => {
     return next(error);
   }
   res.json({
-    data: chapter.paragraphs[numbers - 1],
     totalParagraphs: chapter.totalParagraphs,
+    data: chapter.paragraphs[numbers - 1],
   });
 };
 module.exports = {
