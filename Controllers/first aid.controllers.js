@@ -15,9 +15,10 @@ const addChapter = async (req, res, next) => {
     );
     return next(error);
   }
-  const paragraphMarker = "@"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
+  const paragraphMarker = "#"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
   const filePath = req.file.filename;
-
+  const name = filePath.split(".")[0];
+  const extension = filePath.split(".")[1];
   if (!filePath) {
     const error = appError.create(
       "File path must be provided",
@@ -60,7 +61,7 @@ const addChapter = async (req, res, next) => {
           const result = extractLetters(firstLine);
           const currentPhoto = `${req.protocol}://${req.get(
             "host"
-          )}/uploads/chapter 1/${result}.jpg`;
+          )}/uploads/${name}/${result}.png`;
           return {
             pageNumber: paragraphNumber,
             title: firstLine,
@@ -68,8 +69,6 @@ const addChapter = async (req, res, next) => {
             currentPhoto: currentPhoto,
           };
         });
-        const name = filePath.split(".")[0];
-        extension = filePath.split(".")[1];
         const chapter = await chapterModel.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
