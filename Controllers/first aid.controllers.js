@@ -62,9 +62,6 @@ const addChapter = async (req, res, next) => {
           }
 
           const result = extractLetters(firstLine);
-          // const currentPhoto = `${req.protocol}://${req.get(
-          //   "host"
-          // )}/uploads/${name}/${result}.png`;
           const currentPhoto = `${result}.png`;
           return {
             pageNumber: paragraphNumber,
@@ -120,50 +117,6 @@ const addChapter = async (req, res, next) => {
       });
   });
 };
-
-//modify size page
-// const chapter1 = (req, res) => {
-//   // const pageSize = 200; // حجم الصفحة
-//   const paragraphMarker = "@"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
-
-//   const filePath = "YOUR DOC DATA.docx";
-//   const page = req.params.num;
-
-//   if (!filePath) {
-//     return res.status(400).json({ error: "يجب توفير مسار الملف" });
-//   }
-
-//   const absolutePath = path.resolve(__dirname, "..", "file", filePath);
-
-//   fs.readFile(absolutePath, "utf-8", (err, data) => {
-//     if (err) {
-//       return res.status(500).json({ error: "حدث خطأ أثناء قراءة الملف" });
-//     }
-
-//     mammoth
-//       .extractRawText({ path: absolutePath })
-//       .then((result) => {
-//         // const text = result.value;
-//         const paragraphs = result.value.split(paragraphMarker);
-//         // حساب النص للصفحة المطلوبة لو استخدمنا size معين
-//         // const start = (page - 1) * pageSize;
-//         // const end = start + pageSize;
-//         // const pageText = text.split(' ').slice(start, end).join(' ');
-//         // res.send(pageText);
-//         // res.json({ text: pageText, page, totalPages: Math.ceil(text.split(' ').length / pageSize) });
-
-//         const start = page - 1;
-//         const end = start + 1;
-//         const pageParagraph = paragraphs
-//           .slice(start, end)
-//           .join(paragraphMarker);
-//         res.json({ text: pageParagraph, page, totalPages: paragraphs.length });
-//       })
-//       .catch((error) => {
-//         res.status(500).json({ error: "حدث خطأ أثناء معالجة الملف" });
-//       });
-//   });
-// };
 
 const allChapter = async (req, res, next) => {
   const name = req.params.name;
