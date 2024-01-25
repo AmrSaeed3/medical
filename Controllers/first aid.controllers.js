@@ -214,9 +214,7 @@ const addChapterpdf = async (req, res, next) => {
           }
 
           const result = extractLetters(firstLine);
-          const currentPhoto = `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${name}/${result}.png`;
+          const currentPhoto = `${result}.png`;
           return {
             pageNumber: paragraphNumber,
             title: firstLine,
@@ -275,7 +273,6 @@ const addChapterpdf = async (req, res, next) => {
 module.exports = {
   addChapter,
   allChapter,
-  //   chapter1,
   addChapterpdf,
   chapter,
 };
