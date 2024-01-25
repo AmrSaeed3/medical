@@ -62,9 +62,10 @@ const addChapter = async (req, res, next) => {
           }
 
           const result = extractLetters(firstLine);
-          const currentPhoto = `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${name}/${result}.png`;
+          // const currentPhoto = `${req.protocol}://${req.get(
+          //   "host"
+          // )}/uploads/${name}/${result}.png`;
+          const currentPhoto = `${result}.png`;
           return {
             pageNumber: paragraphNumber,
             title: firstLine,
@@ -166,10 +167,14 @@ const addChapter = async (req, res, next) => {
 
 const allChapter = async (req, res, next) => {
   const name = req.params.name;
+  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
   const chapter = await chapterModel.findOne(
     { name: name },
     { __v: false, _id: false, extension: false }
   );
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
   if (!chapter) {
     const error = appError.create(
       "this chapter not found try again !",
@@ -180,11 +185,14 @@ const allChapter = async (req, res, next) => {
   }
   res.json(chapter);
 };
-
 const chapter = async (req, res, next) => {
   const numbers = req.params.num;
   const name = req.params.name;
   const chapter = await chapterModel.findOne({ name: name });
+  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
   if (!chapter) {
     const error = appError.create(
       "this chapter not found try again !",
