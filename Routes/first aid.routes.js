@@ -7,6 +7,9 @@ router
   .route("/addChapter")
   .post(uploadWord.single("chapter"), firstAidController.addChapter);
 router
+  .route("/addQuiz")
+  .post(uploadWord.single("chapter"), firstAidController.addQuiz);
+router
   .route("/addChapterpdf")
   .post(uploadWord.single("chapter"), firstAidController.addChapterpdf);
 router.route("/readAll/:name").get(firstAidController.allChapter);

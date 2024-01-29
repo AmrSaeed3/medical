@@ -49,7 +49,8 @@ const addChapter = async (req, res, next) => {
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
           const lines = paragraph.split("\n");
-          const firstLine = lines.length > 0 ? lines[0].trim() : "";
+          const filteredArray = lines.filter((value) => value.trim() !== "");
+          const firstLine = filteredArray[0].trim();
 
           function extractLetters(sentence) {
             // استخراج الحروف فقط
@@ -97,7 +98,7 @@ const addChapter = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        await newaway.save();
+        // await newaway.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
@@ -201,7 +202,9 @@ const addChapterpdf = async (req, res, next) => {
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
           const lines = paragraph.split("\n");
-          const firstLine = lines.length > 0 ? lines[0].trim() : "";
+          // const firstLine = lines.length > 0 ? lines[0].trim() : "";
+          const filteredArray = lines.filter((value) => value.trim() !== "");
+          const firstLine = filteredArray[0].trim();
 
           function extractLetters(sentence) {
             // استخراج الحروف فقط
@@ -249,7 +252,7 @@ const addChapterpdf = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        await newaway.save();
+        // await newaway.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
@@ -269,10 +272,113 @@ const addChapterpdf = async (req, res, next) => {
       });
   });
 };
+const addQuiz = async (req, res, next) => {
+  if (!req.file) {
+    const error = appError.create(
+      "The file was not uploaded",
+      400,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  const paragraphMarker = "#"; // يمكنك تغيير هذا إلى الرمز الذي قمت بوضعه في ملف Word
+  const filePath = req.file.filename;
+  const name = filePath.split(".")[0];
+  const extension = filePath.split(".")[1];
+  if (!filePath) {
+    const error = appError.create(
+      "File path must be provided",
+      400,
+      statusText.ERROR
+    );
+    return next(error);
+  }
+
+  const absolutePath = path.resolve(__dirname, "..", "file", filePath);
+
+  fs.readFile(absolutePath, "utf-8", (err, data) => {
+    if (err) {
+      const error = appError.create(
+        "An error occurred while reading the file",
+        500,
+        statusText.ERROR
+      );
+      return next(error);
+    }
+
+    mammoth
+      .extractRawText({ path: absolutePath })
+      .then(async (result) => {
+        const paragraphs = result.value.split(paragraphMarker);
+        // إضافة ترقيم لكل فقرة
+        const numberedParagraphs = paragraphs.map((paragraph, index) => {
+          const paragraphNumber = index + 1;
+          const lines = paragraph.split("\n");
+          const filteredArray = lines.filter((value) => value.trim() !== "");
+          const question = filteredArray[0].trim();
+          const answer = filteredArray.pop();
+          const choose = filteredArray.filter(
+            (value) => value.trim() !== question
+          );
+          return {
+            pageNumber: paragraphNumber,
+            question: question,
+            choose: choose,
+            answer: answer,
+          };
+        });
+        const chapter = await chapterModel.findOne({ name: name });
+        if (chapter) {
+          const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
+          const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
+          fs.unlink(filePathToDelete, (err) => {
+            if (err) {
+              const error = appError.create(
+                "wrong in the delete data",
+                400,
+                httpStatus.FAIL
+              );
+              return next(error);
+            }
+          });
+          const error = appError.create(
+            "this chapter is already exist",
+            400,
+            statusText.FAIL
+          );
+          return next(error);
+        }
+        const newaway = new chapterModel({
+          name: name,
+          extension: extension,
+          totalParagraphs: paragraphs.length,
+          paragraphs: numberedParagraphs,
+        });
+        // await newaway.save();
+
+        // ارسل النص المرقم والفقرة المحددة
+        res.json({
+          message: "The file has been uploaded successfully.",
+          name: name,
+          totalParagraphs: paragraphs.length,
+          paragraphs: numberedParagraphs,
+        });
+      })
+      .catch((err) => {
+        const error = appError.create(
+          "An error occurred while processing the file",
+          500,
+          statusText.ERROR
+        );
+        return next(error);
+      });
+  });
+};
 
 module.exports = {
   addChapter,
   allChapter,
   addChapterpdf,
+  addQuiz,
   chapter,
 };
