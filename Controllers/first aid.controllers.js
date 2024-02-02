@@ -1,11 +1,12 @@
-const { user1 } = require("../Models/firs aid.models");
+const { data1, data2 } = require("../Models/firs aid.models");
 const mammoth = require("mammoth");
 const pdf = require("pdf-parse");
 const fs = require("fs");
 const path = require("path");
 const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
-const chapterModel = user1;
+const chapterModel = data1;
+const Image = data2;
 
 const allChapter = async (req, res, next) => {
   const name = req.params.name;
@@ -85,6 +86,7 @@ const addChapterword = async (req, res, next) => {
     mammoth
       .extractRawText({ path: absolutePath })
       .then(async (result) => {
+        const arrayPhotos = [];
         const paragraphs = result.value.split(paragraphMarker);
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
@@ -94,8 +96,13 @@ const addChapterword = async (req, res, next) => {
           const firstLine = filteredArray[0].trim();
 
           function extractLetters(sentence) {
-            // استخراج الحروف فقط
-            const lettersOnly = sentence.replace(/[^a-zA-Z\s]/g, "");
+            // إزالة الترقيم المحددة
+            const cleanedLine = sentence.replace(
+              /(?:^|\n)\s*[➢a-zA-Z\d]\s*-\s*|\d+-\s*|\(\w\)-\s*/g,
+              ""
+            );
+            // استخراج الحروف والأقواس
+            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s()]/g, "");
             //إزالة المسافة في بداية الجملة
             const cleanedSentence = lettersOnly
               .replace(/^\s+/, "")
@@ -105,6 +112,8 @@ const addChapterword = async (req, res, next) => {
 
           const result = extractLetters(firstLine);
           const currentPhoto = `${result}.png`;
+          // حفظ كل currentPhoto في مصفوفة
+          arrayPhotos.push(currentPhoto);
           return {
             pageNumber: paragraphNumber,
             title: firstLine,
@@ -133,13 +142,40 @@ const addChapterword = async (req, res, next) => {
           );
           return next(error);
         }
+        if (arrayPhotos) {
+          // فحص وجود الصور في مجلد uploads
+          const missingImages = arrayPhotos.filter((arrayPhotos) => {
+            const imagePath = path.join(
+              __dirname,
+              "..",
+              "uploads",
+              "chapter 3",
+              arrayPhotos
+            ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
+            return !fs.existsSync(imagePath);
+          });
+          // الآن `missingImages` يحتوي على أسماء الصور التي غير موجودة في مجلد uploads
+          return res.json({
+            message: "FAIL !, images not found in folder",
+            data: missingImages,
+            count: missingImages.length,
+          });
+        }
         const newaway = new chapterModel({
           name: name,
           extension: extension,
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        // await newaway.save();
+        await newaway.save();
+
+        const image = new Image({
+          name: name,
+          extension: extension,
+          totalImages: paragraphs.length,
+          arrayPhotos: arrayPhotos,
+        });
+        await image.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
@@ -196,6 +232,7 @@ const addChapterpdf = async (req, res, next) => {
     pdf(data)
       .then(async (result) => {
         // data.text يحتوي على نص الملف
+        const arrayPhotos = [];
         const paragraphs = result.text.split(paragraphMarker);
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
@@ -205,11 +242,13 @@ const addChapterpdf = async (req, res, next) => {
           const firstLine = filteredArray[0].trim();
 
           function extractLetters(sentence) {
-            // إزالة أي ترقيم من بداية السطر
-            const cleanedLine = sentence.replace(/^\(\w\)-\s*/, "");
-            console.log(cleanedLine);
-            // استخراج الحروف فقط
-            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s]/g, "");
+            // إزالة الترقيم المحددة
+            const cleanedLine = sentence.replace(
+              /(?:^|\n)\s*[➢a-zA-Z\d]\s*-\s*|\d+-\s*|\(\w\)-\s*/g,
+              ""
+            );
+            // استخراج الحروف والأقواس
+            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s()]/g, "");
             //إزالة المسافة في بداية الجملة
             const cleanedSentence = lettersOnly
               .replace(/^\s+/, "")
@@ -219,6 +258,8 @@ const addChapterpdf = async (req, res, next) => {
 
           const result = extractLetters(firstLine);
           const currentPhoto = `${result}.png`;
+          // حفظ كل currentPhoto في مصفوفة
+          arrayPhotos.push(currentPhoto);
           return {
             pageNumber: paragraphNumber,
             title: firstLine,
@@ -247,13 +288,40 @@ const addChapterpdf = async (req, res, next) => {
           );
           return next(error);
         }
+        if (arrayPhotos) {
+          // فحص وجود الصور في مجلد uploads
+          const missingImages = arrayPhotos.filter((arrayPhotos) => {
+            const imagePath = path.join(
+              __dirname,
+              "..",
+              "uploads",
+              "chapter 3",
+              arrayPhotos
+            ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
+            return !fs.existsSync(imagePath);
+          });
+          // الآن `missingImages` يحتوي على أسماء الصور التي غير موجودة في مجلد uploads
+          return res.json({
+            message: "FAIL !, images not found in folder",
+            data: missingImages,
+            count: missingImages.length,
+          });
+        }
         const newaway = new chapterModel({
           name: name,
           extension: extension,
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        // await newaway.save();
+        await newaway.save();
+
+        const image = new Image({
+          name: name,
+          extension: extension,
+          totalImages: paragraphs.length,
+          arrayPhotos: arrayPhotos,
+        });
+        await image.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({

@@ -3,12 +3,21 @@ const validator = require("validator");
 
 const Chapters = new mongoose.Schema({
   name: String,
-  extension:String,
+  extension: String,
   totalParagraphs: Number,
   paragraphs: Array,
 });
-const user1 = mongoose.model("Chapters", Chapters);
 
+const Images = new mongoose.Schema({
+  name: String,
+  extension: String,
+  totalImages: Number,
+  arrayPhotos: Array,
+});
+
+const data1 = mongoose.model("Chapters", Chapters);
+const data2 = mongoose.model("Images", Images);
 module.exports = {
-  user1,
+  data1,
+  data2,
 };
