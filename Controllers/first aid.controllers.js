@@ -7,7 +7,48 @@ const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
 const chapterModel = user1;
 
-const addChapter = async (req, res, next) => {
+const allChapter = async (req, res, next) => {
+  const name = req.params.name;
+  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
+  const chapter = await chapterModel.findOne(
+    { name: name },
+    { __v: false, _id: false, extension: false }
+  );
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
+  if (!chapter) {
+    const error = appError.create(
+      "this chapter not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  res.json(chapter);
+};
+const chapter = async (req, res, next) => {
+  const numbers = req.params.num;
+  const name = req.params.name;
+  const chapter = await chapterModel.findOne({ name: name });
+  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
+  if (!chapter) {
+    const error = appError.create(
+      "this chapter not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  res.json({
+    totalParagraphs: chapter.totalParagraphs,
+    data: chapter.paragraphs[numbers - 1],
+  });
+};
+const addChapterword = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
       "The file was not uploaded",
@@ -118,48 +159,6 @@ const addChapter = async (req, res, next) => {
       });
   });
 };
-
-const allChapter = async (req, res, next) => {
-  const name = req.params.name;
-  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
-  const chapter = await chapterModel.findOne(
-    { name: name },
-    { __v: false, _id: false, extension: false }
-  );
-  chapter.paragraphs.forEach((paragraph) => {
-    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
-  });
-  if (!chapter) {
-    const error = appError.create(
-      "this chapter not found try again !",
-      401,
-      statusText.FAIL
-    );
-    return next(error);
-  }
-  res.json(chapter);
-};
-const chapter = async (req, res, next) => {
-  const numbers = req.params.num;
-  const name = req.params.name;
-  const chapter = await chapterModel.findOne({ name: name });
-  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
-  chapter.paragraphs.forEach((paragraph) => {
-    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
-  });
-  if (!chapter) {
-    const error = appError.create(
-      "this chapter not found try again !",
-      401,
-      statusText.FAIL
-    );
-    return next(error);
-  }
-  res.json({
-    totalParagraphs: chapter.totalParagraphs,
-    data: chapter.paragraphs[numbers - 1],
-  });
-};
 const addChapterpdf = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
@@ -202,13 +201,15 @@ const addChapterpdf = async (req, res, next) => {
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
           const lines = paragraph.split("\n");
-          // const firstLine = lines.length > 0 ? lines[0].trim() : "";
           const filteredArray = lines.filter((value) => value.trim() !== "");
           const firstLine = filteredArray[0].trim();
 
           function extractLetters(sentence) {
+            // إزالة أي ترقيم من بداية السطر
+            const cleanedLine = sentence.replace(/^\(\w\)-\s*/, "");
+            console.log(cleanedLine);
             // استخراج الحروف فقط
-            const lettersOnly = sentence.replace(/[^a-zA-Z\s]/g, "");
+            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s]/g, "");
             //إزالة المسافة في بداية الجملة
             const cleanedSentence = lettersOnly
               .replace(/^\s+/, "")
@@ -264,7 +265,7 @@ const addChapterpdf = async (req, res, next) => {
       })
       .catch((err) => {
         const error = appError.create(
-          "An error occurred while processing the file2",
+          "An error occurred while processing the file",
           500,
           statusText.ERROR
         );
@@ -376,7 +377,7 @@ const addQuiz = async (req, res, next) => {
 };
 
 module.exports = {
-  addChapter,
+  addChapterword,
   allChapter,
   addChapterpdf,
   addQuiz,

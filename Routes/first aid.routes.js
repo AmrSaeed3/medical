@@ -5,7 +5,7 @@ const { uploadWord } = require("../Middlewires/multer");
 const firstAidController = require("../Controllers/first aid.controllers");
 router
   .route("/addChapter")
-  .post(uploadWord.single("chapter"), firstAidController.addChapter);
+  .post(uploadWord.single("chapter"), firstAidController.addChapterword);
 router
   .route("/addQuiz")
   .post(uploadWord.single("chapter"), firstAidController.addQuiz);
