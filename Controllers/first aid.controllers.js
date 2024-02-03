@@ -7,10 +7,14 @@ const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
 const chapterModel = data1;
 const Image = data2;
+const folderdata = "file";
+const folderphoto = "uploads";
 
 const allChapter = async (req, res, next) => {
   const name = req.params.name;
-  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
+  const currentPhoto = `${req.protocol}://${req.get(
+    "host"
+  )}/${folderphoto}/${name}`;
   const chapter = await chapterModel.findOne(
     { name: name },
     { __v: false, _id: false, extension: false }
@@ -32,7 +36,9 @@ const chapter = async (req, res, next) => {
   const numbers = req.params.num;
   const name = req.params.name;
   const chapter = await chapterModel.findOne({ name: name });
-  const currentPhoto = `${req.protocol}://${req.get("host")}/uploads/${name}`;
+  const currentPhoto = `${req.protocol}://${req.get(
+    "host"
+  )}/${folderphoto}/${name}`;
   chapter.paragraphs.forEach((paragraph) => {
     paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
   });
@@ -71,7 +77,7 @@ const addChapterword = async (req, res, next) => {
     return next(error);
   }
 
-  const absolutePath = path.resolve(__dirname, "..", "file", filePath);
+  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath);
 
   fs.readFile(absolutePath, "utf-8", (err, data) => {
     if (err) {
@@ -124,7 +130,12 @@ const addChapterword = async (req, res, next) => {
         const chapter = await chapterModel.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
-          const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
+          const filePathToDelete = path.join(
+            __dirname,
+            "..",
+            folderdata,
+            fileName
+          ); // تحديد الملف بناءً على المجلد الجذر
           fs.unlink(filePathToDelete, (err) => {
             if (err) {
               const error = appError.create(
@@ -148,8 +159,8 @@ const addChapterword = async (req, res, next) => {
             const imagePath = path.join(
               __dirname,
               "..",
-              "uploads",
-              "chapter 3",
+              folderphoto,
+              name,
               arrayPhotos
             ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
             return !fs.existsSync(imagePath);
@@ -217,7 +228,7 @@ const addChapterpdf = async (req, res, next) => {
     return next(error);
   }
 
-  const absolutePath = path.resolve(__dirname, "..", "file", filePath);
+  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath);
   // قراءة محتوى الملف PDF
   fs.readFile(absolutePath, (err, data) => {
     if (err) {
@@ -233,6 +244,11 @@ const addChapterpdf = async (req, res, next) => {
       .then(async (result) => {
         // data.text يحتوي على نص الملف
         const arrayPhotos = [];
+        const arrayPhotos2 = [];
+        // استخدام fs.promises.readdir للحصول على جميع الملفات في المجلد
+        const files = await fs.promises.readdir(
+          path.join(__dirname, "..", folderphoto, name)
+        );
         const paragraphs = result.text.split(paragraphMarker);
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
@@ -270,7 +286,12 @@ const addChapterpdf = async (req, res, next) => {
         const chapter = await chapterModel.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
-          const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
+          const filePathToDelete = path.join(
+            __dirname,
+            "..",
+            folderdata,
+            fileName
+          ); // تحديد الملف بناءً على المجلد الجذر
           fs.unlink(filePathToDelete, (err) => {
             if (err) {
               const error = appError.create(
@@ -290,13 +311,14 @@ const addChapterpdf = async (req, res, next) => {
         }
         if (arrayPhotos) {
           // فحص وجود الصور في مجلد uploads
-          const missingImages = arrayPhotos.filter((arrayPhotos) => {
+          const missingImages = arrayPhotos.filter((arrayPhoto) => {
+            // استخراج اسم الملف بدون الامتداد
             const imagePath = path.join(
               __dirname,
               "..",
-              "uploads",
-              "chapter 3",
-              arrayPhotos
+              folderphoto,
+              name,
+              arrayPhoto
             ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
             return !fs.existsSync(imagePath);
           });
@@ -313,7 +335,7 @@ const addChapterpdf = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        await newaway.save();
+        // await newaway.save();
 
         const image = new Image({
           name: name,
@@ -321,7 +343,7 @@ const addChapterpdf = async (req, res, next) => {
           totalImages: paragraphs.length,
           arrayPhotos: arrayPhotos,
         });
-        await image.save();
+        // await image.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
@@ -341,6 +363,7 @@ const addChapterpdf = async (req, res, next) => {
       });
   });
 };
+
 const addQuiz = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
@@ -363,7 +386,7 @@ const addQuiz = async (req, res, next) => {
     return next(error);
   }
 
-  const absolutePath = path.resolve(__dirname, "..", "file", filePath);
+  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath);
 
   fs.readFile(absolutePath, "utf-8", (err, data) => {
     if (err) {
@@ -399,7 +422,12 @@ const addQuiz = async (req, res, next) => {
         const chapter = await chapterModel.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
-          const filePathToDelete = path.join(__dirname, "..", "file", fileName); // تحديد الملف بناءً على المجلد الجذر
+          const filePathToDelete = path.join(
+            __dirname,
+            "..",
+            folderdata,
+            fileName
+          ); // تحديد الملف بناءً على المجلد الجذر
           fs.unlink(filePathToDelete, (err) => {
             if (err) {
               const error = appError.create(
@@ -423,7 +451,7 @@ const addQuiz = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        // await newaway.save();
+        await newaway.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
