@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+
 const validationSchema = () => {
   return [
     body("userName")
@@ -18,7 +19,6 @@ const validationSchema = () => {
       .withMessage("password at least is 4 digits"),
   ];
 };
-
 const validationSchema2 = () => {
   return [
     body("email")
@@ -36,6 +36,11 @@ const validationSchema2 = () => {
 const validationSchema3 = () => {
   return [
     body("newPassword")
+      .notEmpty()
+      .withMessage("newPassword is required")
+      .isLength({ min: 4 })
+      .withMessage("newPassword at least is 4 digits"),
+    body("newPassword2")
       .notEmpty()
       .withMessage("newPassword is required")
       .isLength({ min: 4 })

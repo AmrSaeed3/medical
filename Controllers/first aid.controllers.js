@@ -1,4 +1,4 @@
-const { data1, data2 } = require("../Models/firs aid.models");
+const { data1, data2, data3 } = require("../Models/firs aid.models");
 const mammoth = require("mammoth");
 const pdf = require("pdf-parse");
 const fs = require("fs");
@@ -7,54 +7,10 @@ const appError = require("../utils/appError");
 const statusText = require("../utils/httpStatus");
 const chapterModel = data1;
 const Image = data2;
+const Quiz = data3;
 const folderdata = "file";
 const folderphoto = "uploads";
 
-const allChapter = async (req, res, next) => {
-  const name = req.params.name;
-  const currentPhoto = `${req.protocol}://${req.get(
-    "host"
-  )}/${folderphoto}/${name}`;
-  const chapter = await chapterModel.findOne(
-    { name: name },
-    { __v: false, _id: false, extension: false }
-  );
-  chapter.paragraphs.forEach((paragraph) => {
-    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
-  });
-  if (!chapter) {
-    const error = appError.create(
-      "this chapter not found try again !",
-      401,
-      statusText.FAIL
-    );
-    return next(error);
-  }
-  res.json(chapter);
-};
-const chapter = async (req, res, next) => {
-  const numbers = req.params.num;
-  const name = req.params.name;
-  const chapter = await chapterModel.findOne({ name: name });
-  const currentPhoto = `${req.protocol}://${req.get(
-    "host"
-  )}/${folderphoto}/${name}`;
-  chapter.paragraphs.forEach((paragraph) => {
-    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
-  });
-  if (!chapter) {
-    const error = appError.create(
-      "this chapter not found try again !",
-      401,
-      statusText.FAIL
-    );
-    return next(error);
-  }
-  res.json({
-    totalParagraphs: chapter.totalParagraphs,
-    data: chapter.paragraphs[numbers - 1],
-  });
-};
 const addChapterword = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
@@ -168,8 +124,8 @@ const addChapterword = async (req, res, next) => {
           // الآن `missingImages` يحتوي على أسماء الصور التي غير موجودة في مجلد uploads
           return res.json({
             message: "FAIL !, images not found in folder",
+            totalMissing: missingImages.length,
             data: missingImages,
-            count: missingImages.length,
           });
         }
         const newaway = new chapterModel({
@@ -244,7 +200,6 @@ const addChapterpdf = async (req, res, next) => {
       .then(async (result) => {
         // data.text يحتوي على نص الملف
         const arrayPhotos = [];
-        const arrayPhotos2 = [];
         // استخدام fs.promises.readdir للحصول على جميع الملفات في المجلد
         const files = await fs.promises.readdir(
           path.join(__dirname, "..", folderphoto, name)
@@ -325,8 +280,8 @@ const addChapterpdf = async (req, res, next) => {
           // الآن `missingImages` يحتوي على أسماء الصور التي غير موجودة في مجلد uploads
           return res.json({
             message: "FAIL !, images not found in folder",
+            totalMissing: missingImages.length,
             data: missingImages,
-            count: missingImages.length,
           });
         }
         const newaway = new chapterModel({
@@ -361,6 +316,53 @@ const addChapterpdf = async (req, res, next) => {
         );
         return next(error);
       });
+  });
+};
+
+const allChapter = async (req, res, next) => {
+  const name = req.params.name;
+  const currentPhoto = `${req.protocol}://${req.get(
+    "host"
+  )}/${folderphoto}/${name}`;
+  const chapter = await chapterModel.findOne(
+    { name: name },
+    { __v: false, _id: false, extension: false }
+  );
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
+  if (!chapter) {
+    const error = appError.create(
+      "this chapter not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  res.json(chapter);
+};
+
+const onechapter = async (req, res, next) => {
+  const numbers = req.params.num;
+  const name = req.params.name;
+  const chapter = await chapterModel.findOne({ name: name });
+  const currentPhoto = `${req.protocol}://${req.get(
+    "host"
+  )}/${folderphoto}/${name}`;
+  chapter.paragraphs.forEach((paragraph) => {
+    paragraph.currentPhoto = `${currentPhoto}/${paragraph.currentPhoto}`;
+  });
+  if (!chapter) {
+    const error = appError.create(
+      "this chapter not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  res.json({
+    totalParagraphs: chapter.totalParagraphs,
+    data: chapter.paragraphs[numbers - 1],
   });
 };
 
@@ -402,6 +404,7 @@ const addQuiz = async (req, res, next) => {
       .extractRawText({ path: absolutePath })
       .then(async (result) => {
         const paragraphs = result.value.split(paragraphMarker);
+        const count = [];
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
@@ -412,14 +415,28 @@ const addQuiz = async (req, res, next) => {
           const choose = filteredArray.filter(
             (value) => value.trim() !== question
           );
+          function extractLetters(sentence) {
+            //إزالة المسافة في بداية الجملة
+            const cleanedSentence = sentence
+              .replace(/^\s+/, "")
+              .replace(/\s+$/, "");
+            return cleanedSentence;
+          }
+
+          const resultanswer = extractLetters(answer);
+          const numanswer = choose.indexOf(resultanswer) + 1;
+          if (numanswer == 0) {
+            count.push(paragraphNumber);
+          }
           return {
             pageNumber: paragraphNumber,
             question: question,
             choose: choose,
             answer: answer,
+            numanswer: numanswer,
           };
         });
-        const chapter = await chapterModel.findOne({ name: name });
+        const chapter = await Quiz.findOne({ name: name });
         if (chapter) {
           const fileName = req.file.filename; // اسم الملف الذي تريد حذفه
           const filePathToDelete = path.join(
@@ -445,7 +462,15 @@ const addQuiz = async (req, res, next) => {
           );
           return next(error);
         }
-        const newaway = new chapterModel({
+        if (count > 0) {
+          return res.json({
+            message: "The file has been uploaded Fail !",
+            missingParagraph: count,
+            totalMissing: count.length,
+            // paragraphs: numberedParagraphs,
+          });
+        }
+        const newaway = new Quiz({
           name: name,
           extension: extension,
           totalParagraphs: paragraphs.length,
@@ -456,6 +481,7 @@ const addQuiz = async (req, res, next) => {
         // ارسل النص المرقم والفقرة المحددة
         res.json({
           message: "The file has been uploaded successfully.",
+          totalMissing: count.length,
           name: name,
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
@@ -471,11 +497,41 @@ const addQuiz = async (req, res, next) => {
       });
   });
 };
-
+const allquiz = async (req, res, next) => {
+  const name = req.params.name;
+  const oldquiz = await Quiz.findOne(
+    { name: name },
+    { _id: false, extension: false }
+  );
+  if (!oldquiz) {
+    const error = appError.create("this quiz is found !", 400, statusText.FAIL);
+    return next(error);
+  }
+  return res.json({ data: oldquiz });
+};
+const onequiz = async (req, res, next) => {
+  const numbers = req.params.num;
+  const name = req.params.name;
+  const chapter = await Quiz.findOne({ name: name });
+  if (!chapter) {
+    const error = appError.create(
+      "this chapter not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  res.json({
+    totalParagraphs: chapter.totalParagraphs,
+    data: chapter.paragraphs[numbers - 1],
+  });
+};
 module.exports = {
   addChapterword,
-  allChapter,
   addChapterpdf,
+  allChapter,
+  onechapter,
   addQuiz,
-  chapter,
+  allquiz,
+  onequiz,
 };
