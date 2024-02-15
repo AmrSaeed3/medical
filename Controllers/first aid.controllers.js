@@ -404,7 +404,8 @@ const addQuiz = async (req, res, next) => {
       .extractRawText({ path: absolutePath })
       .then(async (result) => {
         const paragraphs = result.value.split(paragraphMarker);
-        const count = [];
+        const numParagrphMissing = [];
+        const dataMissing = [];
         // إضافة ترقيم لكل فقرة
         const numberedParagraphs = paragraphs.map((paragraph, index) => {
           const paragraphNumber = index + 1;
@@ -425,8 +426,9 @@ const addQuiz = async (req, res, next) => {
 
           const resultanswer = extractLetters(answer);
           const numanswer = choose.indexOf(resultanswer) + 1;
-          if (numanswer == 0) {
-            count.push(paragraphNumber);
+          if (numanswer == 0 || choose.length >=5) {
+            numParagrphMissing.push(paragraphNumber);
+            dataMissing.push(question, choose, resultanswer ,{countChoose : choose.length , numanswer :numanswer});
           }
           return {
             pageNumber: paragraphNumber,
@@ -462,12 +464,12 @@ const addQuiz = async (req, res, next) => {
           );
           return next(error);
         }
-        if (count > 0) {
+        if (numParagrphMissing.length > 0) {
           return res.json({
             message: "The file has been uploaded Fail !",
-            missingParagraph: count,
-            totalMissing: count.length,
-            // paragraphs: numberedParagraphs,
+            missingParagraph: numParagrphMissing,
+            totalMissing: numParagrphMissing.length,
+            dataMissing: dataMissing,
           });
         }
         const newaway = new Quiz({
@@ -481,7 +483,7 @@ const addQuiz = async (req, res, next) => {
         // ارسل النص المرقم والفقرة المحددة
         res.json({
           message: "The file has been uploaded successfully.",
-          totalMissing: count.length,
+          totalMissing: numParagrphMissing.length,
           name: name,
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
