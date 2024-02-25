@@ -218,8 +218,8 @@ const addChapterpdf = async (req, res, next) => {
               /(?:^|\n)\s*[➢a-zA-Z\d]\s*-\s*|\d+-\s*|\(\w\)-\s*/g,
               ""
             );
-            // استخراج الحروف والأقواس
-            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s()]/g, "");
+            // استخراج الحروف والأقواس , & , - ,
+            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s()&-]/g, "");
             //إزالة المسافة في بداية الجملة
             const cleanedSentence = lettersOnly
               .replace(/^\s+/, "")
@@ -264,19 +264,19 @@ const addChapterpdf = async (req, res, next) => {
           );
           return next(error);
         }
-        if (arrayPhotos) {
-          // فحص وجود الصور في مجلد uploads
-          const missingImages = arrayPhotos.filter((arrayPhoto) => {
-            // استخراج اسم الملف بدون الامتداد
-            const imagePath = path.join(
-              __dirname,
-              "..",
-              folderphoto,
-              name,
-              arrayPhoto
-            ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
-            return !fs.existsSync(imagePath);
-          });
+        // فحص وجود الصور في مجلد uploads
+        const missingImages = arrayPhotos.filter((arrayPhoto) => {
+          // استخراج اسم الملف بدون الامتداد
+          const imagePath = path.join(
+            __dirname,
+            "..",
+            folderphoto,
+            name,
+            arrayPhoto
+          ); // استبدل 'uploads' بالمسار الصحيح لمجلد الرفع الخاص بك
+          return !fs.existsSync(imagePath);
+        });
+        if (missingImages.length > 0) {
           // الآن `missingImages` يحتوي على أسماء الصور التي غير موجودة في مجلد uploads
           return res.json({
             message: "FAIL !, images not found in folder",
@@ -284,13 +284,15 @@ const addChapterpdf = async (req, res, next) => {
             data: missingImages,
           });
         }
+
         const newaway = new chapterModel({
           name: name,
           extension: extension,
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        // await newaway.save();
+        
+        await newaway.save();
 
         const image = new Image({
           name: name,
@@ -298,7 +300,7 @@ const addChapterpdf = async (req, res, next) => {
           totalImages: paragraphs.length,
           arrayPhotos: arrayPhotos,
         });
-        // await image.save();
+        await image.save();
 
         // ارسل النص المرقم والفقرة المحددة
         res.json({
@@ -426,9 +428,12 @@ const addQuiz = async (req, res, next) => {
 
           const resultanswer = extractLetters(answer);
           const numanswer = choose.indexOf(resultanswer) + 1;
-          if (numanswer == 0 || choose.length >=5) {
+          if (numanswer == 0 || choose.length >= 5) {
             numParagrphMissing.push(paragraphNumber);
-            dataMissing.push(question, choose, resultanswer ,{countChoose : choose.length , numanswer :numanswer});
+            dataMissing.push(question, choose, resultanswer, {
+              countChoose: choose.length,
+              numanswer: numanswer,
+            });
           }
           return {
             pageNumber: paragraphNumber,
