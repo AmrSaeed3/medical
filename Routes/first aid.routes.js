@@ -23,5 +23,6 @@ router
 router.route("/readAllquiz/:name").get(firstAidController.allquiz);
 
 router.route("/read-one-quiz/:name/:num").get(firstAidController.onequiz);
+router.route("/getarray").get(firstAidController.addchat);
 
 module.exports = router;

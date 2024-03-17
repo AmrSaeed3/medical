@@ -10,6 +10,8 @@ const Image = data2;
 const Quiz = data3;
 const folderdata = "file";
 const folderphoto = "uploads";
+const moment = require("moment");
+require("moment/locale/ar"); // تحديد لغة اللغة العربية
 
 const addChapterword = async (req, res, next) => {
   if (!req.file) {
@@ -218,15 +220,19 @@ const addChapterpdf = async (req, res, next) => {
               /(?:^|\n)\s*[➢a-zA-Z\d]\s*-\s*|\d+-\s*|\(\w\)-\s*/g,
               ""
             );
-            // استخراج الحروف والأقواس , & , - ,
-            const lettersOnly = cleanedLine.replace(/[^a-zA-Z\s()&-]/g, "");
+            // استخراج الحروف والأقواس , & , - , , ,
+            const lettersOnly = cleanedLine.replace(
+              /[^a-zA-Z0-9-*\s()&,]/g,
+              ""
+            );
+            // إزالة العلامة '*' من النص
+            const withoutAsterisk = lettersOnly.replace(/\*/g, "");
             //إزالة المسافة في بداية الجملة
-            const cleanedSentence = lettersOnly
+            const cleanedSentence = withoutAsterisk
               .replace(/^\s+/, "")
               .replace(/\s+$/, "");
             return cleanedSentence;
           }
-
           const result = extractLetters(firstLine);
           const currentPhoto = `${result}.png`;
           // حفظ كل currentPhoto في مصفوفة
@@ -291,7 +297,7 @@ const addChapterpdf = async (req, res, next) => {
           totalParagraphs: paragraphs.length,
           paragraphs: numberedParagraphs,
         });
-        
+
         await newaway.save();
 
         const image = new Image({
@@ -390,7 +396,7 @@ const addQuiz = async (req, res, next) => {
     return next(error);
   }
 
-  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath);
+  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath );
 
   fs.readFile(absolutePath, "utf-8", (err, data) => {
     if (err) {
@@ -472,8 +478,8 @@ const addQuiz = async (req, res, next) => {
         if (numParagrphMissing.length > 0) {
           return res.json({
             message: "The file has been uploaded Fail !",
-            missingParagraph: numParagrphMissing,
             totalMissing: numParagrphMissing.length,
+            missingParagraph: numParagrphMissing,
             dataMissing: dataMissing,
           });
         }
@@ -533,7 +539,69 @@ const onequiz = async (req, res, next) => {
     data: chapter.paragraphs[numbers - 1],
   });
 };
+const addchat = (req, res, next) => {
+  const fileName = "nada.txt";
+
+  // قراءة محتوى الملف
+  fs.readFile(fileName, "utf-8", (err, data) => {
+    if (err) {
+      console.error(`Error reading file: ${err}`);
+      return;
+    }
+    const messages = [];
+    data.split("\n").map((line, index) => {
+      let timestamp, sender, content, day;
+
+      // التحقق من وجود العلامة ":" أو "-" في السطر
+      if (line.includes(": ") && line.includes(" - ")) {
+        const [timestamparabic, senderContent] = line.split(" - ");
+        // التحقق مرة أخرى بعد التقسيم الأول
+        const [currentSender, currentContent] = senderContent.split(": ");
+        const alltimestamp = convertToEnglishFormat(timestamparabic);
+        sender = currentSender;
+        content = currentContent;
+        const [currentDay, time, timing] = alltimestamp.split(" ");
+        timestamp = time + " " + timing;
+        day = currentDay;
+      } else {
+        // Initialize an empty array to store previous messages
+        const prevMessage = messages[index - 1];
+        // إذا لم يتم العثور على العلامات، يكون content هو السطر نفسه
+        timestamp = prevMessage.timestamp;
+        sender = prevMessage.sender;
+        content = line;
+        day = prevMessage.day;
+      }
+
+      messages.push({ timestamp, sender, content, day });
+    });
+
+    // تحويل التاريخ والوقت
+    function convertToEnglishFormat(timestamp) {
+      const formattedDate = moment(timestamp, "DD/MM/YYYY h:mm a")
+        .locale("en")
+        .format("DD/MM/YYYY hh:mm a");
+      return formattedDate;
+    }
+    // تحويل المصفوفة إلى سلسلة نصية
+    const messagesText = JSON.stringify(messages, null, 2);
+    // المجلد الذي تريد حفظ الملف فيه
+    const folderPath = "C:\\Users\\mrws3\\OneDrive\\Desktop\\New folder";
+
+    // اسم الملف
+    const fileName = "nada.txt";
+
+    // تكوين المسار الكامل للملف
+    const filePath = path.join(folderPath, fileName);
+
+    // حفظ الملف
+    fs.writeFileSync(filePath, messagesText, "utf-8");
+
+    return res.json(messages);
+  });
+};
 module.exports = {
+  addchat,
   addChapterword,
   addChapterpdf,
   allChapter,
