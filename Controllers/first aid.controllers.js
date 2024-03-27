@@ -540,7 +540,7 @@ const onequiz = async (req, res, next) => {
   });
 };
 const addchat = (req, res, next) => {
-  const fileName = "nada.txt";
+  const fileName = "nada2.txt";
 
   // قراءة محتوى الملف
   fs.readFile(fileName, "utf-8", (err, data) => {
@@ -586,10 +586,10 @@ const addchat = (req, res, next) => {
     // تحويل المصفوفة إلى سلسلة نصية
     const messagesText = JSON.stringify(messages, null, 2);
     // المجلد الذي تريد حفظ الملف فيه
-    const folderPath = "C:\\Users\\mrws3\\OneDrive\\Desktop\\New folder";
+    const folderPath = "C:\\Users\\AMR\\Desktop\\New folder";
 
     // اسم الملف
-    const fileName = "nada.txt";
+    const fileName = "nada2.txt";
 
     // تكوين المسار الكامل للملف
     const filePath = path.join(folderPath, fileName);
