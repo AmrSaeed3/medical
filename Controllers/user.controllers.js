@@ -88,18 +88,7 @@ const verify = asyncWrapper(async (req, res, next) => {
   res.json({ status: httpStatus.SUCCESS, data: { User: newUser } });
 });
 //login
-const login = (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = appError.create(errors.array()[0], 400, httpStatus.FAIL);
-    return next(error);
-  }
-  passport.authenticate("local", {
-    successRedirect: "/success",
-    failureRedirect: "/failure",
-    failureFlash: true,
-  })(req, res);
-};
+
 const login2 = asyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
   const errors = validationResult(req);
@@ -229,116 +218,6 @@ const resetPasswordOk = asyncWrapper(async (req, res, next) => {
   return next(error);
 });
 
-const logout2 = (req, res) => {
-  // req.logout((err) => {
-  //   if (err) {
-  //     return res
-  //       .status(500)
-  //       .json("Logout failed! " + req.flash("error"))
-  //       .redirect("/"); // أو يمكنك التعامل مع الخطأ بطريقة أخرى
-  //   }
-  //   res.redirect("/");
-  // });
-  (req, res) => {
-    req.logout((err) => {
-      if (err) {
-        console.error("Error during logout:", err);
-        return res
-          .status(500)
-          .json({ status: "error", message: "Internal Server Error" });
-      }
-      res.redirect("/login");
-    });
-  };
-};
-const success = (req, res, next) => {
-  const error = appError.create("Login successful!", 200, httpStatus.SUCCESS);
-  return next(error);
-};
-const failure = (req, res, next) => {
-  const result = req.flash("error");
-  // res.status(401).json("Login failed! " + req.flash("error"));
-  const error = appError.create(result[0], 401, httpStatus.FAIL);
-  return next(error);
-};
-
-// const handleValidationErrors = (req, res, next) => {
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     const error = appError.create(errors.array()[0], 400, httpStatus.FAIL);
-//     return next(error);
-//   }
-//   next();
-// };
-
-const logout = async (req, res) => {
-  if (req.isAuthenticated()) {
-    const { email } = req.user;
-
-    // توفير وظيفة callback
-    req.logout(() => {
-      // حذف البريد الإلكتروني من قاعدة البيانات
-      UserGoogle
-        .findOneAndDelete({ email })
-        .then(() => {
-          // حذف الكوكيز معرف المستخدم
-          res.clearCookie("userId");
-          res.clearCookie("sessionToken");
-          res.redirect("/");
-        })
-        .catch((err) => {
-          console.error("Error deleting user:", err);
-          res.redirect("/");
-        });
-    });
-
-    return;
-  }
-
-  // إذا لم يكن المستخدم قد قام بتسجيل الدخول، قم بتوجيهه إلى الصفحة الرئيسية أو أي مكان آخر
-  res.redirect("/");
-};
-const homePage = (req, res) => {
-  res.send(
-    req.isAuthenticated()
-      ? `Hello, ${req.user.displayName}! <a href="/logout">Logout</a>`
-      : 'Welcome! <a href="/auth/google">Login with Google</a>'
-  );
-};
-const authGoogle = (req, res) => {
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })(req, res);
-};
-
-const anyone = asyncWrapper(async (req, res, next) => {
-  const user = await UserAnyone.findOne({ mac: mac });
-  if (user) {
-    const error = appError.create(
-      "Oops , you can use SKIP FOR NOW just only once",
-      500,
-      httpStatus.ERROR
-    );
-    return next(error);
-  }
-  const token = await generateJwt.generatequicly({
-    mac: mac,
-  });
-  const newUser = new UserAnyone({
-    mac: mac,
-  });
-  await newUser.save();
-  res.status(200).json({
-    status: httpStatus.SUCCESS,
-    data: newUser,
-    token: token.token,
-    expireData: token.expireIn,
-  });
-  // setTimeout(() => {
-  //   res.redirect('/success')
-  // }, token.expireData);
-});
-
 const deleteUser = asyncWrapper(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -363,18 +242,7 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
   );
   return next(error);
 });
-//
-const homePage2 = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Home Page.html"));
-};
 
-const privacyPolicy = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Privacy Policy.html"));
-};
-
-const termsOfService = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Terms of Service.html"));
-};
 //
 const addphoto = asyncWrapper(async (req, res, next) => {
   // الحصول على التاريخ والوقت الحالي
@@ -472,6 +340,127 @@ const deleteData = asyncWrapper(async (req, res, next) => {
   const error = appError.create("data is delete", 200, httpStatus.SUCCESS);
   return next(error);
 });
+
+const logout2 = (req, res) => {
+  // req.logout((err) => {
+  //   if (err) {
+  //     return res
+  //       .status(500)
+  //       .json("Logout failed! " + req.flash("error"))
+  //       .redirect("/"); // أو يمكنك التعامل مع الخطأ بطريقة أخرى
+  //   }
+  //   res.redirect("/");
+  // });
+  (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        console.error("Error during logout:", err);
+        return res
+          .status(500)
+          .json({ status: "error", message: "Internal Server Error" });
+      }
+      res.redirect("/login");
+    });
+  };
+};
+const success = (req, res, next) => {
+  const error = appError.create("Login successful!", 200, httpStatus.SUCCESS);
+  return next(error);
+};
+const failure = (req, res, next) => {
+  const result = req.flash("error");
+  // res.status(401).json("Login failed! " + req.flash("error"));
+  const error = appError.create(result[0], 401, httpStatus.FAIL);
+  return next(error);
+};
+// const handleValidationErrors = (req, res, next) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     const error = appError.create(errors.array()[0], 400, httpStatus.FAIL);
+//     return next(error);
+//   }
+//   next();
+// };
+
+const logout = async (req, res) => {
+  if (req.isAuthenticated()) {
+    const { email } = req.user;
+
+    // توفير وظيفة callback
+    req.logout(() => {
+      // حذف البريد الإلكتروني من قاعدة البيانات
+      UserGoogle
+        .findOneAndDelete({ email })
+        .then(() => {
+          // حذف الكوكيز معرف المستخدم
+          res.clearCookie("userId");
+          res.clearCookie("sessionToken");
+          res.redirect("/");
+        })
+        .catch((err) => {
+          console.error("Error deleting user:", err);
+          res.redirect("/");
+        });
+    });
+
+    return;
+  }
+
+  // إذا لم يكن المستخدم قد قام بتسجيل الدخول، قم بتوجيهه إلى الصفحة الرئيسية أو أي مكان آخر
+  res.redirect("/");
+};
+const homePage = (req, res) => {
+  res.send(
+    req.isAuthenticated()
+      ? `Hello, ${req.user.displayName}! <a href="/logout">Logout</a>`
+      : 'Welcome! <a href="/auth/google">Login with Google</a>'
+  );
+};
+const authGoogle = (req, res) => {
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })(req, res);
+};
+
+const anyone = asyncWrapper(async (req, res, next) => {
+  const user = await UserAnyone.findOne({ mac: mac });
+  if (user) {
+    const error = appError.create(
+      "Oops , you can use SKIP FOR NOW just only once",
+      500,
+      httpStatus.ERROR
+    );
+    return next(error);
+  }
+  const token = await generateJwt.generatequicly({
+    mac: mac,
+  });
+  const newUser = new UserAnyone({
+    mac: mac,
+  });
+  await newUser.save();
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: newUser,
+    token: token.token,
+    expireData: token.expireIn,
+  });
+  // setTimeout(() => {
+  //   res.redirect('/success')
+  // }, token.expireData);
+});
+const privacyPolicy = (req, res) => {
+  res.sendFile(path.join(viewsPath, "view", "Privacy Policy.html"));
+};
+
+const termsOfService = (req, res) => {
+  res.sendFile(path.join(viewsPath, "view", "Terms of Service.html"));
+};
+//
+const homePage2 = (req, res) => {
+  res.sendFile(path.join(viewsPath, "view", "Home Page.html"));
+};
+
 module.exports = {
   //getAllUsers,
   // authGoogleCallback,
