@@ -17,8 +17,6 @@ router.route("/verify").post(verifyToken, usersController.verify);
 
 router.route("/login").post(validationSchema2(), usersController.login);
 
-router.route("/login2").post(validationSchema2(), usersController.login2);
-
 router.route("/anyone").get(usersController.anyone);
 
 router.route("/auth/google").get(usersController.authGoogle);

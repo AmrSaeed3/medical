@@ -89,7 +89,7 @@ const verify = asyncWrapper(async (req, res, next) => {
 });
 //login
 
-const login2 = asyncWrapper(async (req, res, next) => {
+const login = asyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -483,10 +483,9 @@ module.exports = {
   authGoogle,
   homePage,
   register,
-  login,
   logout,
   logout2,
   success,
   failure,
-  login2,
+  login,
 };
