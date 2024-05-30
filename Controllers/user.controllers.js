@@ -113,7 +113,8 @@ const login = asyncWrapper(async (req, res, next) => {
     await user.save();
     res.json({
       status: httpStatus.SUCCESS,
-      data: { token: token.token },
+      statusCode : 200 ,
+      data: {username:user.userName, token: token.token },
     });
   } else if (user.password !== password) {
     const error = appError.create(
