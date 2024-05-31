@@ -153,19 +153,18 @@ const oneuser = async (req, res, next) => {
       statusText.FAIL
     );
     return next(error);
-  }
-  const error = appError.create(
-    {
+  }  
+  res.json({
+    status: httpStatus.SUCCESS,
+    statusCode: 200,
+    data: {
       id: id,
       username: user.userName,
       email: user.email,
       role: user.role,
       avatar: user.avatar,
     },
-    200,
-    httpStatus.SUCCESS
-  );
-  return next(error);
+  });
 };
 
 const anyone = asyncWrapper(async (req, res, next) => {
@@ -187,16 +186,13 @@ const anyone = asyncWrapper(async (req, res, next) => {
     date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newUser.save();
-  const error = appError.create(
-    {
+  res.json({
+    status: httpStatus.SUCCESS,
+    statusCode: 200,
       data: newUser,
       token: token.token,
       expireData: token.expireIn,
-    },
-    200,
-    httpStatus.SUCCESS
-  );
-  return next(error);
+  });
 });
 
 const deleteanyone = asyncWrapper(async (req, res, next) => {
