@@ -135,6 +135,30 @@ const login = asyncWrapper(async (req, res, next) => {
 });
 // مسار لإعادة تعيين كلمة المرور (نسيان الباسورد)
 
+const oneuser = async (req, res, next) => {
+  const id = req.params.id;
+  const user = await user1.findOne({ _id: id });
+  if (!user) {
+    const error = appError.create(
+      "this user not found try again !",
+      401,
+      statusText.FAIL
+    );
+    return next(error);
+  }
+  const error = appError.create(
+    {
+      id: id,
+      username: user.userName,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    },
+    200,
+    httpStatus.SUCCESS
+  );
+  return next(error);
+};
 const forgotPassword = asyncWrapper(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -449,12 +473,11 @@ const anyone = asyncWrapper(async (req, res, next) => {
   // }, token.expireData);
 });
 
-
-
 module.exports = {
   //getAllUsers,
   // authGoogleCallback,
   // upload,
+  oneuser,
   deleteData,
   updateData,
   getOneData,
