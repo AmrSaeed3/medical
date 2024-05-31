@@ -15,7 +15,7 @@ const generate = async (payload) => {
   return { expireData, token: token, expireIn };
 };
 const generatequicly = async (payload) => {
-  const expireIn = "4h";
+  const expireIn = "2m";
   const token = await jwt.sign(payload, secretKey, { expiresIn: expireIn });
   const expireData = jwt.decode(token).exp * 1000 - Date.now();
   return { expireData, token: token, expireIn };
