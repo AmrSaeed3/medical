@@ -12,7 +12,7 @@ const emailVerfy = require("../Middlewires/sendEmail");
 const path = require("path");
 const moment = require("moment-timezone");
 // تعيين اللغة إلى الإنجليزية
-moment.locale('en');
+moment.locale("en");
 const UserAll = user1;
 const UserGoogle = user2;
 const UserAnyone = user4;
@@ -112,9 +112,9 @@ const login = asyncWrapper(async (req, res, next) => {
       id: user._id,
       role: user.role,
       avatar: user.avatar,
-      dateLogin: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
     });
     user.token = token.token;
+    user.dateLogin = currentDate.format("DD-MMM-YYYY hh:mm:ss a");
     await user.save();
     res.json({
       status: httpStatus.SUCCESS,
@@ -124,6 +124,9 @@ const login = asyncWrapper(async (req, res, next) => {
         username: user.userName,
         email: email,
         token: token.token,
+        avatar: user.avatar,
+        role: user.role,
+        // dateLogin : currentDate.format("DD-MMM-YYYY hh:mm:ss a")
       },
     });
   } else if (user.password !== password) {
@@ -167,7 +170,7 @@ const oneuser = async (req, res, next) => {
 
 const anyone = asyncWrapper(async (req, res, next) => {
   const user = await UserAnyone.findOne({ mac: mac });
-  const currentDate = moment().tz("Africa/Cairo");;
+  const currentDate = moment().tz("Africa/Cairo");
   if (user) {
     const error = appError.create(
       "Oops , you can use SKIP FOR NOW just only once",
@@ -184,12 +187,16 @@ const anyone = asyncWrapper(async (req, res, next) => {
     date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newUser.save();
-  res.status(200).json({
-    status: httpStatus.SUCCESS,
-    data: newUser,
-    token: token.token,
-    expireData: token.expireIn,
-  });
+  const error = appError.create(
+    {
+      data: newUser,
+      token: token.token,
+      expireData: token.expireIn,
+    },
+    200,
+    httpStatus.SUCCESS
+  );
+  return next(error);
 });
 
 const deleteanyone = asyncWrapper(async (req, res, next) => {
