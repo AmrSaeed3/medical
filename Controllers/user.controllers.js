@@ -11,8 +11,6 @@ const mac = require("../Middlewires/mac");
 const emailVerfy = require("../Middlewires/sendEmail");
 const path = require("path");
 const moment = require("moment-timezone");
-// تعيين اللغة إلى الإنجليزية
-moment.locale("en");
 const UserAll = user1;
 const UserGoogle = user2;
 const UserAnyone = user4;

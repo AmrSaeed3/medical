@@ -10,9 +10,7 @@ const Image = data2;
 const Quiz = data3;
 const folderdata = "file";
 const folderphoto = "uploads";
-const moment = require("moment");
-require("moment/locale/ar"); // تحديد لغة اللغة العربية
-
+const moment = require("moment-timezone");
 const addChapterword = async (req, res, next) => {
   if (!req.file) {
     const error = appError.create(
@@ -396,7 +394,7 @@ const addQuiz = async (req, res, next) => {
     return next(error);
   }
 
-  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath );
+  const absolutePath = path.resolve(__dirname, "..", folderdata, filePath);
 
   fs.readFile(absolutePath, "utf-8", (err, data) => {
     if (err) {
@@ -578,9 +576,9 @@ const addchat = (req, res, next) => {
 
     // تحويل التاريخ والوقت
     function convertToEnglishFormat(timestamp) {
-      const formattedDate = moment(timestamp, "DD/MM/YYYY h:mm a")
-        .locale("en")
-        .format("DD/MM/YYYY hh:mm a");
+      const formattedDate = moment()
+        .tz("Africa/Cairo")
+        .format("DD-MMM-YYYY hh:mm:ss a");
       return formattedDate;
     }
     // تحويل المصفوفة إلى سلسلة نصية
