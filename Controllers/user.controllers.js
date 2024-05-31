@@ -105,9 +105,11 @@ const login = asyncWrapper(async (req, res, next) => {
   const matchedPassword = await bcrypt.compare(password, user.password);
   if (user && matchedPassword) {
     const token = await generateJwt.generateLogin({
+      username :user.userName,
       email: user.email,
       id: user._id,
       role: user.role,
+      avatar : user.avatar
     });
     user.token = token.token;
     await user.save();
