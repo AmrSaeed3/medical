@@ -22,13 +22,18 @@ const User = new mongoose.Schema({
     enum: [userRole.USER, userRole.ADMIN, userRole.MANGER],
     default: userRole.USER,
   },
-  date: {
+  dateRegister: {
     type: String,
-    require: [true, "date are required"],
+  },
+  dateLogin: {
+    type: String,
   },
   avatar: {
     type: String,
     default: "uploads/profile.png",
+  },
+  token: {
+    type: String,
   },
 });
 const UserGoogle = new mongoose.Schema({
@@ -40,7 +45,18 @@ const UserToken = new mongoose.Schema({
   token: String,
 });
 const UserAnyone = new mongoose.Schema({
+  userName: {
+    type: String,
+    default: "guest",
+  },
   mac: String,
+  date: {
+    type: String,
+  },
+  avatar: {
+    type: String,
+    default: "uploads/profile.png",
+  },
 });
 const UserFaceBook = new mongoose.Schema({
   facebookId: String,
@@ -52,7 +68,7 @@ const UserJWT = new mongoose.Schema({
   macAddress: { type: String, required: true, unique: true },
 });
 const illnesses = new mongoose.Schema({
-  title:String,
+  title: String,
   avatar: String,
   explain: String,
 });
@@ -62,7 +78,7 @@ const user3 = mongoose.model("UserToken", UserToken);
 const user4 = mongoose.model("UserAnyone", UserAnyone);
 const user6 = mongoose.model("UserFaceBook", UserFaceBook);
 const user7 = mongoose.model("UserJWT", UserJWT);
-const user8 = mongoose.model("illnesses" , illnesses)
+const user8 = mongoose.model("illnesses", illnesses);
 module.exports = {
   user1,
   user2,

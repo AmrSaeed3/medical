@@ -10,7 +10,9 @@ const bcrypt = require("bcryptjs");
 const mac = require("../Middlewires/mac");
 const emailVerfy = require("../Middlewires/sendEmail");
 const path = require("path");
-const moment = require("moment");
+const moment = require("moment-timezone");
+// تعيين اللغة إلى الإنجليزية
+moment.locale('en');
 const UserAll = user1;
 const UserGoogle = user2;
 const UserAnyone = user4;
@@ -54,9 +56,8 @@ const register = asyncWrapper(async (req, res, next) => {
 
 const verify = asyncWrapper(async (req, res, next) => {
   // الحصول على التاريخ والوقت الحالي
-  const currentDate = moment();
+  const currentDate = moment().tz("Africa/Cairo");
   const { email, verifyCode, password, userName, role } = req.currentUser;
-  //  console.log("req.file", req.file);
   const currentCode = verifyCode;
   const code = req.body.code;
   const matchedCode = await bcrypt.compare(code, currentCode);
@@ -82,7 +83,7 @@ const verify = asyncWrapper(async (req, res, next) => {
     email,
     password,
     role,
-    date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
+    dateRegister: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newUser.save();
   res.json({ status: httpStatus.SUCCESS, data: { User: newUser } });
@@ -92,6 +93,7 @@ const verify = asyncWrapper(async (req, res, next) => {
 const login = asyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
   const errors = validationResult(req);
+  const currentDate = moment().tz("Africa/Cairo");
   if (!errors.isEmpty()) {
     const error = appError.create(errors.array(), 400, httpStatus.FAIL);
     return next(error);
@@ -105,11 +107,12 @@ const login = asyncWrapper(async (req, res, next) => {
   const matchedPassword = await bcrypt.compare(password, user.password);
   if (user && matchedPassword) {
     const token = await generateJwt.generateLogin({
-      username :user.userName,
+      username: user.userName,
       email: user.email,
       id: user._id,
       role: user.role,
-      avatar : user.avatar
+      avatar: user.avatar,
+      dateLogin: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
     });
     user.token = token.token;
     await user.save();
@@ -164,6 +167,7 @@ const oneuser = async (req, res, next) => {
 
 const anyone = asyncWrapper(async (req, res, next) => {
   const user = await UserAnyone.findOne({ mac: mac });
+  const currentDate = moment().tz("Africa/Cairo");;
   if (user) {
     const error = appError.create(
       "Oops , you can use SKIP FOR NOW just only once",
@@ -177,6 +181,7 @@ const anyone = asyncWrapper(async (req, res, next) => {
   });
   const newUser = new UserAnyone({
     mac: mac,
+    date: currentDate.format("DD-MMM-YYYY hh:mm:ss a"),
   });
   await newUser.save();
   res.status(200).json({
@@ -185,14 +190,11 @@ const anyone = asyncWrapper(async (req, res, next) => {
     token: token.token,
     expireData: token.expireIn,
   });
-  // setTimeout(() => {
-  //   res.redirect('/success')
-  // }, token.expireData);
 });
 
 const deleteanyone = asyncWrapper(async (req, res, next) => {
-  const id = req.params.id
-  const user = await UserAnyone.findById(id)
+  const id = req.params.id;
+  const user = await UserAnyone.findById(id);
   if (!user) {
     const error = appError.create(
       "not found this user !",
@@ -495,8 +497,6 @@ const authGoogle = (req, res) => {
     scope: ["profile", "email"],
   })(req, res);
 };
-
-
 
 module.exports = {
   //getAllUsers,
