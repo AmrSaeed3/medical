@@ -139,7 +139,7 @@ const login = asyncWrapper(async (req, res, next) => {
 
 const oneuser = async (req, res, next) => {
   const id = req.params.id;
-  const user = await user1.findOne({ _id: id });
+  const user = await user1.findById(id);
   if (!user) {
     const error = appError.create(
       "this user not found try again !",
@@ -161,6 +161,55 @@ const oneuser = async (req, res, next) => {
   );
   return next(error);
 };
+
+const anyone = asyncWrapper(async (req, res, next) => {
+  const user = await UserAnyone.findOne({ mac: mac });
+  if (user) {
+    const error = appError.create(
+      "Oops , you can use SKIP FOR NOW just only once",
+      500,
+      httpStatus.ERROR
+    );
+    return next(error);
+  }
+  const token = await generateJwt.generatequicly({
+    mac: mac,
+  });
+  const newUser = new UserAnyone({
+    mac: mac,
+  });
+  await newUser.save();
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: newUser,
+    token: token.token,
+    expireData: token.expireIn,
+  });
+  // setTimeout(() => {
+  //   res.redirect('/success')
+  // }, token.expireData);
+});
+
+const deleteanyone = asyncWrapper(async (req, res, next) => {
+  const id = req.params.id
+  const user = await UserAnyone.findById(id)
+  if (!user) {
+    const error = appError.create(
+      "not found this user !",
+      400,
+      httpStatus.FAIL
+    );
+    return next(error);
+  }
+  await UserAnyone.findByIdAndDelete(id);
+  const error = appError.create(
+    "this email has been deleted",
+    200,
+    httpStatus.SUCCESS
+  );
+  return next(error);
+});
+
 const forgotPassword = asyncWrapper(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -447,38 +496,13 @@ const authGoogle = (req, res) => {
   })(req, res);
 };
 
-const anyone = asyncWrapper(async (req, res, next) => {
-  const user = await UserAnyone.findOne({ mac: mac });
-  if (user) {
-    const error = appError.create(
-      "Oops , you can use SKIP FOR NOW just only once",
-      500,
-      httpStatus.ERROR
-    );
-    return next(error);
-  }
-  const token = await generateJwt.generatequicly({
-    mac: mac,
-  });
-  const newUser = new UserAnyone({
-    mac: mac,
-  });
-  await newUser.save();
-  res.status(200).json({
-    status: httpStatus.SUCCESS,
-    data: newUser,
-    token: token.token,
-    expireData: token.expireIn,
-  });
-  // setTimeout(() => {
-  //   res.redirect('/success')
-  // }, token.expireData);
-});
+
 
 module.exports = {
   //getAllUsers,
   // authGoogleCallback,
   // upload,
+  deleteanyone,
   oneuser,
   deleteData,
   updateData,

@@ -21,6 +21,8 @@ router.route("/getOneUser/:id").get(usersController.oneuser)
 
 router.route("/anyone").get(usersController.anyone);
 
+router.route("/deleteAnyOne/:id").get(usersController.deleteanyone)
+
 router.route("/auth/google").get(usersController.authGoogle);
 
 // router.route("/auth/google/callback").get(usersController.authGoogleCallback);
