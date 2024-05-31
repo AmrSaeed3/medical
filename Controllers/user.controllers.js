@@ -1,4 +1,4 @@
-const {user1 ,user2 , user4 , user8} = require("../Models/user.models");
+const { user1, user2, user4, user8 } = require("../Models/user.models");
 const fs = require("fs");
 const appError = require("../utils/appError");
 const httpStatus = require("../utils/httpStatus");
@@ -113,8 +113,13 @@ const login = asyncWrapper(async (req, res, next) => {
     await user.save();
     res.json({
       status: httpStatus.SUCCESS,
-      statusCode : 200 ,
-      data: {username:user.userName, token: token.token },
+      statusCode: 200,
+      data: {
+        id: user.id,
+        username: user.userName,
+        email: email,
+        token: token.token,
+      },
     });
   } else if (user.password !== password) {
     const error = appError.create(
@@ -390,8 +395,7 @@ const logout = async (req, res) => {
     // توفير وظيفة callback
     req.logout(() => {
       // حذف البريد الإلكتروني من قاعدة البيانات
-      UserGoogle
-        .findOneAndDelete({ email })
+      UserGoogle.findOneAndDelete({ email })
         .then(() => {
           // حذف الكوكيز معرف المستخدم
           res.clearCookie("userId");
@@ -410,13 +414,7 @@ const logout = async (req, res) => {
   // إذا لم يكن المستخدم قد قام بتسجيل الدخول، قم بتوجيهه إلى الصفحة الرئيسية أو أي مكان آخر
   res.redirect("/");
 };
-const homePage = (req, res) => {
-  res.send(
-    req.isAuthenticated()
-      ? `Hello, ${req.user.displayName}! <a href="/logout">Logout</a>`
-      : 'Welcome! <a href="/auth/google">Login with Google</a>'
-  );
-};
+
 const authGoogle = (req, res) => {
   passport.authenticate("google", {
     scope: ["profile", "email"],
@@ -450,17 +448,8 @@ const anyone = asyncWrapper(async (req, res, next) => {
   //   res.redirect('/success')
   // }, token.expireData);
 });
-const privacyPolicy = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Privacy Policy.html"));
-};
 
-const termsOfService = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Terms of Service.html"));
-};
-//
-const homePage2 = (req, res) => {
-  res.sendFile(path.join(viewsPath, "view", "Home Page.html"));
-};
+
 
 module.exports = {
   //getAllUsers,
@@ -471,9 +460,6 @@ module.exports = {
   getOneData,
   getAllData,
   addphoto,
-  homePage2,
-  privacyPolicy,
-  termsOfService,
   deleteUser,
   verify,
   anyone,
@@ -482,7 +468,6 @@ module.exports = {
   resetPasswordSend,
   resetPasswordOk,
   authGoogle,
-  homePage,
   register,
   logout,
   logout2,
